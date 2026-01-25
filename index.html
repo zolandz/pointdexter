@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>pointdextro.us</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0a0a0b;--surface:#141416;--surface-elevated:#1c1c1f;--border:#2a2a2e;--text:#e8e8eb;--text-muted:#8a8a8f;--accent:#3b82f6;--accent-glow:rgba(59,130,246,0.15);--success:#22c55e;--warning:#f59e0b}
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{overflow-x:hidden;width:100%;height:100%;position:fixed;left:0;right:0}
+    body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100%;line-height:1.5;overflow-x:hidden;overflow-y:auto;width:100%;position:fixed;left:0;right:0;top:0;bottom:0;-webkit-overflow-scrolling:touch}
+
+    /* Results bar */
+    .results-bar{position:sticky;top:0;left:0;right:0;z-index:100;background:linear-gradient(180deg,#1a1a2e 0%,#12121a 100%);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);transition:all 0.3s ease;margin-bottom:14px}
+    .results-bar::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--success),var(--accent));background-size:200% 100%;opacity:0;transition:opacity 0.3s}
+    .results-bar.has-results::before{opacity:1;animation:gradient-shift 3s ease-in-out infinite}
+    @keyframes gradient-shift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+    .results-bar-inner{padding:16px 24px;position:relative}
+    .results-bar.has-results .results-bar-inner{padding-bottom:32px}
+
+    .results-empty-state{color:var(--text);font-size:1.5rem;display:flex;align-items:center;justify-content:center;gap:12px;transition:opacity 0.3s ease,transform 0.3s ease}
+    .results-empty-state .plane-icon{font-size:24px;opacity:0.7;animation:gentle-float 4s ease-in-out infinite}
+    .results-empty-state .site-name{font-weight:700;letter-spacing:-0.03em;background:linear-gradient(135deg,#fff 0%,#a5b4fc 50%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    @keyframes gentle-float{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-2px) rotate(2deg)}}
+
+    .reset-btn{position:absolute;left:calc(100% + 12px);top:50%;transform:translateY(-50%);background:transparent;border:1px solid var(--border);border-radius:6px;padding:6px;font-size:0;line-height:1;color:var(--text-muted);cursor:pointer;transition:all 0.15s;opacity:0;pointer-events:none;display:flex;align-items:center;justify-content:center}
+    .reset-btn:hover{color:var(--text);border-color:var(--text-muted);background:rgba(255,255,255,0.03)}
+    .reset-btn:active{transform:translateY(-50%) scale(0.95)}
+    .reset-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2}
+    .results-bar.has-results .reset-btn{opacity:1;pointer-events:auto}
+
+    .results-content{opacity:0;transform:translateY(-8px);transition:opacity 0.4s ease,transform 0.4s ease;pointer-events:none;position:absolute;width:100%;left:0;top:0;padding:16px 24px}
+    .results-bar.has-results .results-empty-state{opacity:0;transform:translateY(8px);pointer-events:none}
+    .results-bar.has-results .results-content{opacity:1;transform:translateY(0);pointer-events:auto;position:relative;padding:0}
+    @keyframes fade-in{from{opacity:0}to{opacity:1}}
+
+    /* Collapsed view */
+    .results-collapsed{display:flex;align-items:center;justify-content:center;padding:0 40px}
+    .results-hero{position:relative}
+    .results-hero-text{text-align:center}
+    .results-miles-row{position:relative;display:inline-block}
+    .results-miles{font-family:'JetBrains Mono',monospace;font-size:2.75rem;font-weight:500;letter-spacing:-0.03em;background:linear-gradient(135deg,#fff 0%,#a5b4fc 40%,var(--accent) 70%,var(--success) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;text-shadow:0 0 60px rgba(59,130,246,0.3)}
+    .results-label{font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:500;margin-top:4px}
+
+    /* Expanded view - table */
+    .results-details{display:none;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06)}
+    .results-bar.expanded .results-details{display:block;animation:slide-down 0.25s ease-out}
+    @keyframes slide-down{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+
+    .results-table{width:100%;max-width:720px;margin:0 auto;border-collapse:collapse}
+    .results-table th{font-size:0.6rem;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);padding:0 10px 10px;text-align:right;cursor:default;position:relative}
+    .results-table th:first-child{text-align:left}
+    .results-table th[title]{border-bottom:1px dotted var(--text-muted)}
+    .results-table td{padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;text-align:right;border-top:1px solid rgba(255,255,255,0.04)}
+    .results-table td:first-child{text-align:left;font-weight:500}
+    .results-table tr:hover td{background:rgba(255,255,255,0.02)}
+    .results-table .segment-route{display:inline-flex;align-items:center;gap:6px}
+    .results-table .plane-icon{font-size:9px;opacity:0.4}
+    .results-table .total-row td{border-top:1px solid rgba(255,255,255,0.1);font-weight:500;padding-top:12px}
+    .results-table .total-row td.eqm-total{color:var(--accent)}
+    .results-table .total-row td.rdm-total{color:var(--success)}
+    .results-table .city-code{position:relative;cursor:default}
+    .results-table .city-code::after{content:attr(data-tooltip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--surface-elevated);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:0.6rem;font-family:'DM Sans',sans-serif;font-weight:400;white-space:nowrap;opacity:0;visibility:hidden;transition:all 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+    .results-table .city-code::before{content:'';position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--border);opacity:0;visibility:hidden;transition:all 0.15s ease}
+    .results-table .city-code:hover::after,.results-table .city-code:hover::before{opacity:1;visibility:visible}
+
+    /* Toggle button */
+    .expand-toggle{position:absolute;bottom:0;left:50%;transform:translate(-50%,50%);background:linear-gradient(180deg,#1e1e2a 0%,#16161f 100%);border:1px solid var(--border);border-radius:50%;width:28px;height:28px;padding:0;cursor:pointer;color:var(--text-muted);display:none;align-items:center;justify-content:center;transition:all 0.2s ease;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:10}
+    .expand-toggle:hover{color:var(--text);background:linear-gradient(180deg,#252532 0%,#1a1a24 100%);border-color:rgba(255,255,255,0.1);transform:translate(-50%,50%) scale(1.05)}
+    .expand-toggle:active{transform:translate(-50%,50%) scale(0.95)}
+    .results-bar.has-results .expand-toggle{display:flex}
+    .expand-toggle .icon-plus,.expand-toggle .icon-minus{font-size:18px;font-weight:300;line-height:1;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+    .expand-toggle .icon-minus{display:none}
+    .results-bar.expanded .expand-toggle .icon-plus{display:none}
+    .results-bar.expanded .expand-toggle .icon-minus{display:flex}
+
+    /* Main content */
+    .main-content{max-width:600px;margin:0 auto;padding:24px 24px 48px;position:relative;z-index:1}
+
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;transition:border-color 0.2s,box-shadow 0.2s}
+    .card:focus-within{border-color:rgba(59,130,246,0.3);box-shadow:0 0 0 1px rgba(59,130,246,0.1)}
+    .card-header{display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:0.7rem;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted)}
+    .card-header::before{content:'';flex:1;height:1px;background:var(--border);order:1}
+    .route-input-container{display:flex;flex-direction:column;gap:8px}
+    .route-input-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center}
+    .route-input{width:72px;flex-shrink:0}
+    .route-input input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 8px;font-family:'JetBrains Mono',monospace;font-size:1rem;color:var(--text);text-transform:uppercase;letter-spacing:0.05em;text-align:center;transition:border-color 0.15s,box-shadow 0.15s,transform 0.15s}
+    .route-input input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+    .route-input input.has-value{border-color:rgba(34,197,94,0.4);background:rgba(34,197,94,0.05)}
+    .route-input input.invalid{border-color:rgba(239,68,68,0.5);background:rgba(239,68,68,0.05)}
+    .route-input input::placeholder{color:var(--text-muted);opacity:0.4}
+    .route-arrow{color:var(--text-muted);font-size:0.85rem;flex-shrink:0;opacity:0.5;transition:opacity 0.2s,transform 0.2s}
+    .route-arrow.active{opacity:1;color:var(--accent)}
+    /* New field animation - slide in from left while fading */
+    .route-input.new-field,.route-arrow.new-field{animation:field-appear 0.3s ease-out}
+    @keyframes field-appear{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+    /* Route reset button */
+    .route-reset-btn{background:transparent;border:none;padding:4px;color:var(--text-muted);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;border-radius:4px;opacity:0.3;order:2}
+    .route-reset-btn:disabled{cursor:default;opacity:0.15}
+    .route-reset-btn:not(:disabled):hover{color:var(--text);background:rgba(255,255,255,0.05);opacity:1}
+    .route-reset-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2}
+    .error-message{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:10px 14px;border-radius:8px;font-size:0.8rem;margin-top:12px;display:none;text-align:center}
+    .error-message.visible{display:block;animation:shake 0.3s ease-out}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+    .segmented-control{display:flex;background:var(--bg);border-radius:10px;padding:4px;gap:4px}
+    .segmented-control input{display:none}
+    .segmented-control label{flex:1;text-align:center;padding:10px 4px;font-size:0.65rem;color:var(--text-muted);cursor:pointer;border-radius:7px;transition:all 0.2s;font-weight:500;line-height:1;display:flex;align-items:center;justify-content:center}
+    .segmented-control label:hover{color:var(--text);background:rgba(255,255,255,0.03)}
+    .segmented-control input:checked+label{color:var(--text)}
+    /* None - subtle dark */
+    .segmented-control input#elite-none:checked+label{background:linear-gradient(180deg,#2a2a2e 0%,#1c1c1f 100%)}
+    /* Silver - subtle silver */
+    .segmented-control input#elite-silver:checked+label{background:linear-gradient(180deg,#c0c0c0 0%,#888888 50%,#a8a8a8 100%);color:#1a1a1a;text-shadow:0 1px 0 rgba(255,255,255,0.3)}
+    /* Gold - warm gold metallic */
+    .segmented-control input#elite-gold:checked+label{background:linear-gradient(180deg,#d4a650 0%,#a67c28 50%,#c9a227 100%);color:#1a1400;text-shadow:0 1px 0 rgba(255,255,255,0.3)}
+    /* Platinum - cool silver metallic */
+    .segmented-control input#elite-platinum:checked+label{background:linear-gradient(180deg,#e8e8e8 0%,#a8a8a8 50%,#d0d0d0 100%);color:#1a1a1a;text-shadow:0 1px 0 rgba(255,255,255,0.5)}
+    /* Titanium - dark gunmetal metallic */
+    .segmented-control input#elite-titanium:checked+label{background:linear-gradient(180deg,#5a5a62 0%,#38383e 50%,#4a4a52 100%);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.4)}
+
+    .form-row{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px}
+    .form-row:last-child{margin-bottom:0}
+    .form-group label{display:block;font-size:0.7rem;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.03em}
+    select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:1rem;color:var(--text);cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238a8a8f' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+    select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+    select option{background:var(--surface);color:var(--text)}
+    .pricing-toggle{display:flex;gap:4px;background:var(--bg);border-radius:8px;padding:4px;margin-bottom:12px}
+    .pricing-toggle button{flex:1;background:transparent;border:none;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:0.8rem;color:var(--text-muted);cursor:pointer;border-radius:6px;transition:all 0.15s}
+    .pricing-toggle button.active{background:var(--surface-elevated);color:var(--text)}
+    .pricing-toggle button:hover:not(.active){color:var(--text)}
+    .pricing-inputs{display:none}
+    .pricing-inputs.active{display:block}
+    .price-input-row{display:flex;gap:12px;align-items:flex-end}
+    .price-input-group{flex:1}
+    .price-input-group label{display:block;font-size:0.7rem;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.03em}
+    .price-input-group input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:1rem;color:var(--text);transition:border-color 0.15s,box-shadow 0.15s}
+    .price-input-group input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+    .price-input-group input::placeholder{color:var(--text-muted);opacity:0.4}
+    .cpm-result{margin-top:12px;padding:12px;background:var(--bg);border-radius:8px;display:none}
+    .cpm-result.visible{display:block;animation:fade-up 0.2s ease-out}
+    @keyframes fade-up{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+    .cpm-value{font-family:'JetBrains Mono',monospace;font-size:1.25rem;font-weight:500;margin-bottom:2px}
+    .cpm-value.good{color:var(--success)}
+    .cpm-value.okay{color:var(--warning)}
+    .cpm-value.poor{color:#ef4444}
+    .cpm-label{font-size:0.7rem;color:var(--text-muted)}
+    .cpm-breakdown{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:0.7rem;color:var(--text-muted)}
+    .info-note{margin-top:16px;padding:12px;background:var(--bg);border-radius:8px;font-size:0.65rem;color:var(--text-muted);line-height:1.5;text-align:center}
+    .info-note a{color:var(--accent);text-decoration:none}
+    .info-note a:hover{text-decoration:underline}
+
+    @media(max-width:600px){
+      .results-bar-inner{padding:12px 16px}
+      .results-miles{font-size:2rem}
+      .reset-btn{left:calc(100% + 8px)}
+      .results-table{font-size:0.6rem}
+      .results-table th,.results-table td{padding:5px 4px}
+      .results-table th{font-size:0.45rem;letter-spacing:0.02em}
+      .results-table .segment-route{gap:4px}
+      .results-table .plane-icon{font-size:7px}
+      .main-content{padding:16px 16px 32px}
+      .form-row{grid-template-columns:1fr}
+      .segmented-control label{font-size:0.55rem;padding:8px 2px}
+    }
+  </style>
+</head>
+<body>
+  <div class="results-bar" id="resultsBar">
+    <div class="results-bar-inner">
+      <div class="results-empty-state"><span class="plane-icon">✈</span> <span class="site-name">pointdextro.us</span></div>
+      <div class="results-content">
+        <div class="results-collapsed">
+          <div class="results-hero">
+            <div class="results-hero-text">
+              <div class="results-miles-row">
+                <div class="results-miles" id="totalMiles">0</div>
+                <button class="reset-btn" id="resetBtn" title="Reset">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="results-label">redeemable miles</div>
+            </div>
+          </div>
+        </div>
+        <div class="results-details">
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>Segment</th>
+                <th>Distance</th>
+                <th>Fare Bonus</th>
+                <th>Elite Bonus</th>
+                <th title="Status Points (Elite Qualifying Miles)">EQM</th>
+                <th title="Redeemable Miles (Award Points)">RDM</th>
+              </tr>
+            </thead>
+            <tbody id="resultsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <button class="expand-toggle" id="expandToggle" title="Toggle details">
+      <span class="icon-plus">+</span>
+      <span class="icon-minus">−</span>
+    </button>
+  </div>
+
+  <div class="main-content">
+    <div class="card">
+      <div class="card-header">Route
+        <button class="route-reset-btn" id="routeResetBtn" title="Clear route">
+          <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
+        </button>
+      </div>
+      <div class="route-input-container">
+        <div class="route-input-row" id="routeInputRow">
+          <div class="route-input"><input type="text" id="leg1" placeholder="SEA" maxlength="3" autocomplete="off"></div>
+          <span class="route-arrow" id="arrow1">→</span>
+          <div class="route-input"><input type="text" id="leg2" placeholder="NRT" maxlength="3" autocomplete="off"></div>
+          <span class="route-arrow" id="arrow2">→</span>
+          <div class="route-input"><input type="text" id="leg3" placeholder="" maxlength="3" autocomplete="off"></div>
+        </div>
+      </div>
+      <div id="error-message" class="error-message"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Flight Details</div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label>Elite Status</label>
+        <div class="segmented-control" id="eliteControl">
+          <input type="radio" name="elite" id="elite-none" value="none" checked>
+          <label for="elite-none">None</label>
+          <input type="radio" name="elite" id="elite-silver" value="silver">
+          <label for="elite-silver">Silver</label>
+          <input type="radio" name="elite" id="elite-gold" value="gold">
+          <label for="elite-gold">Gold</label>
+          <input type="radio" name="elite" id="elite-platinum" value="platinum">
+          <label for="elite-platinum">Platinum</label>
+          <input type="radio" name="elite" id="elite-titanium" value="titanium">
+          <label for="elite-titanium">Titanium</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Operating Airline</label><select id="airline"></select></div>
+        <div class="form-group"><label>Fare Class</label><select id="fareClass"></select></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Pricing (Optional)</div>
+      <div class="pricing-toggle">
+        <button id="toggleCash" class="active">Cash (USD)</button>
+        <button id="togglePoints">Points Redemption</button>
+      </div>
+      <div id="cashInputs" class="pricing-inputs active">
+        <div class="price-input-row">
+          <div class="price-input-group"><label>Ticket Price (USD)</label><input type="text" id="cashPrice" placeholder="450.00" inputmode="decimal" autocomplete="off"></div>
+        </div>
+        <div id="cpmResult" class="cpm-result">
+          <div class="cpm-value" id="cpmValue">0¢</div>
+          <div class="cpm-label">cost per mile earned</div>
+          <div class="cpm-breakdown" id="cpmBreakdown"></div>
+        </div>
+      </div>
+      <div id="pointsInputs" class="pricing-inputs">
+        <div class="price-input-row">
+          <div class="price-input-group"><label>Points Required</label><input type="text" id="pointsRequired" placeholder="25,000" inputmode="numeric" autocomplete="off"></div>
+          <div class="price-input-group"><label>Taxes & Fees (USD)</label><input type="text" id="pointsTaxes" placeholder="50.00" inputmode="decimal" autocomplete="off"></div>
+        </div>
+        <div class="price-input-row" style="margin-top:12px">
+          <div class="price-input-group"><label>Compare to Cash Price (USD)</label><input type="text" id="pointsCashCompare" placeholder="850.00" inputmode="decimal" autocomplete="off"></div>
+        </div>
+        <div id="pointsResult" class="cpm-result">
+          <div class="cpm-value" id="pointsValue">0¢</div>
+          <div class="cpm-label">value per point redeemed</div>
+          <div class="cpm-breakdown" id="pointsBreakdown"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-note">
+      Based on official Atmos Rewards 2025 earning rates.<br>
+      <strong>EQM (Status Points)</strong> = Distance × Fare Class Rate (no elite bonus)<br>
+      <strong>RDM (Redeemable)</strong> = Distance × Fare Class Rate + Elite Bonus<br>
+      <a href="admin.html">View earning rules</a>
+    </div>
+  </div>
+
+  <script type="module">
+import { earningPrograms, airports } from './data/earning-rules.js';
+
+/**
+ * ATMOS REWARDS EARNING MODEL - Based on official Alaska Airlines documentation
+ * Source: https://www.alaskaair.com/atmosrewards/content/earn-points/flights
+ *
+ * KEY RULES:
+ * 1. Status Points (EQM) = Base Miles × Total Fare Class Rate (base + bonus %)
+ * 2. Redeemable Miles (RDM) = (Base Miles × Total Fare Class Rate) + Elite Bonus
+ * 3. Elite bonuses apply ONLY to redeemable miles, NOT to status points
+ * 4. Elite bonuses are calculated on BASE miles only (not fare-class-adjusted miles)
+ */
+
+function toRadians(d) { return d * (Math.PI / 180); }
+
+function calculateDistance(o, d) {
+  const R = 3440.065;
+  const lat1 = toRadians(airports[o].lat);
+  const lat2 = toRadians(airports[d].lat);
+  const dLat = toRadians(airports[d].lat - airports[o].lat);
+  const dLon = toRadians(airports[d].lon - airports[o].lon);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  return Math.round(2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * R * 1.15078);
+}
+
+// Dynamic leg input management
+const MAX_LEGS = 10;
+const INITIAL_LEGS = 3;
+const ADD_FIELD_DELAY = 700; // ms delay before adding new field
+const routeInputRow = document.getElementById('routeInputRow');
+const routeResetBtn = document.getElementById('routeResetBtn');
+
+let pendingAddField = null; // Track pending field addition
+
+function getLegInputs() {
+  return Array.from(routeInputRow.querySelectorAll('.route-input input'));
+}
+
+function getArrows() {
+  return Array.from(routeInputRow.querySelectorAll('.route-arrow'));
+}
+
+function addLegInput() {
+  const inputs = getLegInputs();
+  if (inputs.length >= MAX_LEGS) return null;
+
+  const newIndex = inputs.length + 1;
+
+  // Add arrow before the new input with animation class
+  const arrow = document.createElement('span');
+  arrow.className = 'route-arrow new-field';
+  arrow.id = `arrow${newIndex - 1}`;
+  arrow.textContent = '→';
+  routeInputRow.appendChild(arrow);
+
+  // Add new input with animation class
+  const wrapper = document.createElement('div');
+  wrapper.className = 'route-input new-field';
+  wrapper.innerHTML = `<input type="text" id="leg${newIndex}" placeholder="" maxlength="3" autocomplete="off">`;
+  routeInputRow.appendChild(wrapper);
+
+  // Remove animation class after animation completes
+  setTimeout(() => {
+    arrow.classList.remove('new-field');
+    wrapper.classList.remove('new-field');
+  }, 300);
+
+  const newInput = wrapper.querySelector('input');
+  attachLegInputListeners(newInput);
+  return newInput;
+}
+
+function maybeAddNewLeg(input) {
+  const inputs = getLegInputs();
+  const isLastInput = input === inputs[inputs.length - 1];
+  const hasValue = input.value.trim().length > 0;
+
+  // Clear any pending add
+  if (pendingAddField) {
+    clearTimeout(pendingAddField);
+    pendingAddField = null;
+  }
+
+  if (isLastInput && hasValue && inputs.length < MAX_LEGS) {
+    // Add delay before creating new field
+    pendingAddField = setTimeout(() => {
+      addLegInput();
+      pendingAddField = null;
+    }, ADD_FIELD_DELAY);
+  }
+}
+
+function updateRouteResetState() {
+  const hasContent = getLegInputs().some(i => i.value.trim().length > 0);
+  routeResetBtn.disabled = !hasContent;
+}
+
+function resetToInitialLegs() {
+  // Clear any pending field addition
+  if (pendingAddField) {
+    clearTimeout(pendingAddField);
+    pendingAddField = null;
+  }
+
+  const inputs = getLegInputs();
+  const arrows = getArrows();
+
+  // Remove extra inputs and arrows beyond initial count
+  while (inputs.length > INITIAL_LEGS) {
+    const lastInput = inputs.pop();
+    lastInput.parentElement.remove();
+  }
+  while (arrows.length > INITIAL_LEGS - 1) {
+    const lastArrow = arrows.pop();
+    lastArrow.remove();
+  }
+
+  // Clear all remaining inputs
+  getLegInputs().forEach(i => {
+    i.value = '';
+    i.classList.remove('has-value', 'invalid');
+  });
+  getArrows().forEach(a => a.classList.remove('active'));
+  updateRouteResetState();
+}
+
+// Route-only reset button handler
+routeResetBtn.addEventListener('click', () => {
+  resetToInitialLegs();
+  hideError();
+  calculate();
+  getLegInputs()[0].focus();
+});
+
+function attachLegInputListeners(input) {
+  input.addEventListener('input', () => {
+    input.value = input.value.toUpperCase();
+    maybeAddNewLeg(input);
+    updateRouteResetState();
+    calculate();
+
+    // Auto-focus next input when 3 chars entered
+    const inputs = getLegInputs();
+    const idx = inputs.indexOf(input);
+    if (input.value.length === 3 && idx < inputs.length - 1) {
+      inputs[idx + 1].focus();
+    }
+  });
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Backspace' && input.value === '') {
+      const inputs = getLegInputs();
+      const idx = inputs.indexOf(input);
+      if (idx > 0) {
+        inputs[idx - 1].focus();
+      }
+    }
+  });
+}
+
+// Initialize listeners on existing inputs
+getLegInputs().forEach(input => attachLegInputListeners(input));
+
+const airlineSelect = document.getElementById('airline');
+const fareClassSelect = document.getElementById('fareClass');
+const resultsBar = document.getElementById('resultsBar');
+const errorMessage = document.getElementById('error-message');
+const resultsTableBody = document.getElementById('resultsTableBody');
+const expandToggle = document.getElementById('expandToggle');
+
+// Use the imported earning program
+const program = earningPrograms.alaska;
+
+let isExpanded = window.innerWidth > 600;
+
+function updateExpandedState() {
+  resultsBar.classList.toggle('expanded', isExpanded);
+}
+updateExpandedState();
+
+expandToggle.addEventListener('click', () => { isExpanded = !isExpanded; updateExpandedState(); });
+window.addEventListener('resize', () => { if (window.innerWidth > 600 && !isExpanded) { isExpanded = true; updateExpandedState(); } });
+
+const cashPriceInput = document.getElementById('cashPrice');
+const pointsRequiredInput = document.getElementById('pointsRequired');
+const pointsTaxesInput = document.getElementById('pointsTaxes');
+const pointsCashCompareInput = document.getElementById('pointsCashCompare');
+const cpmResult = document.getElementById('cpmResult');
+const pointsResult = document.getElementById('pointsResult');
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  resetToInitialLegs();
+  document.getElementById('elite-none').checked = true;
+  airlineSelect.selectedIndex = 0;
+  populateFareClasses();
+  cashPriceInput.value = '';
+  pointsRequiredInput.value = '';
+  pointsTaxesInput.value = '';
+  pointsCashCompareInput.value = '';
+  cpmResult.classList.remove('visible');
+  pointsResult.classList.remove('visible');
+  resultsBar.classList.remove('has-results');
+  hideError();
+  getLegInputs()[0].focus();
+});
+
+function getEliteStatus() { return document.querySelector('input[name="elite"]:checked').value; }
+
+function populateAirlines() {
+  airlineSelect.innerHTML = '';
+  Object.entries(program.airlines).forEach(([c, a]) => {
+    const o = document.createElement('option');
+    o.value = c;
+    o.textContent = c + ' - ' + a.name;
+    airlineSelect.appendChild(o);
+  });
+  populateFareClasses();
+}
+
+function populateFareClasses() {
+  const a = program.airlines[airlineSelect.value];
+  fareClassSelect.innerHTML = '';
+  Object.entries(a.fareClasses).forEach(([c, f]) => {
+    const o = document.createElement('option');
+    o.value = c;
+    o.textContent = f.name;
+    fareClassSelect.appendChild(o);
+  });
+  calculate();
+}
+
+function showError(m) { errorMessage.textContent = m; errorMessage.classList.add('visible'); resultsBar.classList.remove('has-results'); }
+function hideError() { errorMessage.classList.remove('visible'); }
+
+function updateArrows() {
+  const legInputs = getLegInputs();
+  const arrows = getArrows();
+
+  legInputs.forEach((i) => {
+    const val = i.value.trim(), len = val.length;
+    i.classList.remove('has-value', 'invalid');
+    if (len === 3) { airports[val.toUpperCase()] ? i.classList.add('has-value') : i.classList.add('invalid'); }
+  });
+  arrows.forEach((a, x) => {
+    const prev = legInputs[x].value.trim(), next = legInputs[x + 1]?.value.trim() || '';
+    a.classList.toggle('active', prev.length === 3 && next.length === 3 && airports[prev.toUpperCase()] && airports[next.toUpperCase()]);
+  });
+}
+
+function getAirports() {
+  const codes = [];
+  for (const i of getLegInputs()) { const code = i.value.toUpperCase().trim(); if (code.length === 3) codes.push(code); }
+  return codes;
+}
+
+/**
+ * CORE CALCULATION LOGIC
+ *
+ * According to official Atmos Rewards documentation:
+ *
+ * For Alaska/Hawaiian flights booked via alaskaair.com:
+ * - Status Points (EQM) = Distance × Total Rate (Base + Bonus)
+ * - Redeemable Miles (RDM) = Distance × Total Rate + Elite Bonus (on base distance)
+ *
+ * Elite bonus is applied to BASE MILES only and does NOT count toward EQM/Status Points
+ */
+function calculate() {
+  updateArrows();
+  const codes = getAirports();
+  if (codes.length < 2) { hideError(); resultsBar.classList.remove('has-results'); return; }
+  for (const c of codes) { if (!airports[c]) { showError('Unknown airport code: ' + c); return; } }
+  hideError();
+
+  const airline = program.airlines[airlineSelect.value];
+  const fareClass = airline.fareClasses[fareClassSelect.value];
+  const eliteStatus = getEliteStatus();
+  const eliteBonusRate = program.eliteBonuses[eliteStatus];
+
+  const segs = [];
+  let totalDist = 0, totalFareBonus = 0, totalEliteBonus = 0, totalEQM = 0, totalRDM = 0;
+
+  for (let i = 0; i < codes.length - 1; i++) {
+    const o = codes[i], d = codes[i + 1];
+    const dist = calculateDistance(o, d);
+
+    // Calculate fare class adjusted miles (applies to both EQM and RDM)
+    const fareAdjustedMiles = Math.round(dist * fareClass.total);
+    const fareBonusMiles = fareAdjustedMiles - dist;
+
+    // Elite bonus: applies to BASE distance only, for RDM only (NOT EQM)
+    const eliteBonusMiles = Math.round(dist * eliteBonusRate);
+
+    // EQM (Status Points) = fare-adjusted miles (NO elite bonus)
+    const eqm = fareAdjustedMiles;
+
+    // RDM (Redeemable Miles) = fare-adjusted miles + elite bonus
+    const rdm = fareAdjustedMiles + eliteBonusMiles;
+
+    totalDist += dist;
+    totalFareBonus += fareBonusMiles;
+    totalEliteBonus += eliteBonusMiles;
+    totalEQM += eqm;
+    totalRDM += rdm;
+
+    segs.push({
+      origin: o,
+      destination: d,
+      originName: airports[o].name,
+      destName: airports[d].name,
+      distance: dist,
+      fareBonus: fareBonusMiles,
+      eliteBonus: eliteBonusMiles,
+      eqm: eqm,
+      rdm: rdm
+    });
+  }
+
+  document.getElementById('totalMiles').textContent = totalRDM.toLocaleString();
+
+  let tableHtml = segs.map(s => `<tr>
+    <td><span class="segment-route"><span class="city-code" data-tooltip="${s.originName}">${s.origin}</span><span class="plane-icon">✈</span><span class="city-code" data-tooltip="${s.destName}">${s.destination}</span></span></td>
+    <td>${s.distance.toLocaleString()}</td>
+    <td>${s.fareBonus >= 0 ? '+' : ''}${s.fareBonus.toLocaleString()}</td>
+    <td>+${s.eliteBonus.toLocaleString()}</td>
+    <td>${s.eqm.toLocaleString()}</td>
+    <td>${s.rdm.toLocaleString()}</td>
+  </tr>`).join('');
+
+  tableHtml += `<tr class="total-row">
+    <td>Total</td>
+    <td>${totalDist.toLocaleString()}</td>
+    <td>${totalFareBonus >= 0 ? '+' : ''}${totalFareBonus.toLocaleString()}</td>
+    <td>+${totalEliteBonus.toLocaleString()}</td>
+    <td class="eqm-total">${totalEQM.toLocaleString()}</td>
+    <td class="rdm-total">${totalRDM.toLocaleString()}</td>
+  </tr>`;
+
+  resultsTableBody.innerHTML = tableHtml;
+  resultsBar.classList.add('has-results');
+
+  // Also update pricing calculations
+  calculateCPM();
+  calculatePointsValue();
+}
+
+airlineSelect.addEventListener('change', populateFareClasses);
+fareClassSelect.addEventListener('change', calculate);
+document.querySelectorAll('input[name="elite"]').forEach(r => r.addEventListener('change', calculate));
+
+populateAirlines();
+
+const toggleCash = document.getElementById('toggleCash');
+const togglePoints = document.getElementById('togglePoints');
+const cashInputs = document.getElementById('cashInputs');
+const pointsInputs = document.getElementById('pointsInputs');
+
+toggleCash.addEventListener('click', () => { toggleCash.classList.add('active'); togglePoints.classList.remove('active'); cashInputs.classList.add('active'); pointsInputs.classList.remove('active'); });
+togglePoints.addEventListener('click', () => { togglePoints.classList.add('active'); toggleCash.classList.remove('active'); pointsInputs.classList.add('active'); cashInputs.classList.remove('active'); });
+
+function parseCurrency(v) { return v ? parseFloat(v.replace(/[$,]/g, '')) || 0 : 0; }
+function parsePoints(v) { return v ? parseInt(v.replace(/,/g, '')) || 0 : 0; }
+function getCurrentTotalMiles() { const el = document.getElementById('totalMiles'); return el ? parseInt(el.textContent.replace(/,/g, '')) || 0 : 0; }
+
+function calculateCPM() {
+  const m = getCurrentTotalMiles(), p = parseCurrency(cashPriceInput.value);
+  if (!m || !p) { cpmResult.classList.remove('visible'); return; }
+  const cpm = (p / m) * 100;
+  const el = document.getElementById('cpmValue');
+  const br = document.getElementById('cpmBreakdown');
+  el.textContent = Math.round(cpm) + '¢';
+  el.classList.remove('good', 'okay', 'poor');
+  if (cpm < 5) el.classList.add('good');
+  else if (cpm < 10) el.classList.add('okay');
+  else el.classList.add('poor');
+  br.textContent = '$' + p.toFixed(2) + ' ÷ ' + m.toLocaleString() + ' miles = ' + Math.round(cpm) + '¢ per mile';
+  cpmResult.classList.add('visible');
+}
+
+function calculatePointsValue() {
+  const pts = parsePoints(pointsRequiredInput.value), tax = parseCurrency(pointsTaxesInput.value), cash = parseCurrency(pointsCashCompareInput.value);
+  if (!pts || !cash) { pointsResult.classList.remove('visible'); return; }
+  const cpp = ((cash - tax) / pts) * 100;
+  const el = document.getElementById('pointsValue');
+  const br = document.getElementById('pointsBreakdown');
+  el.textContent = Math.round(cpp) + '¢';
+  el.classList.remove('good', 'okay', 'poor');
+  if (cpp >= 1.5) el.classList.add('good');
+  else if (cpp >= 1.0) el.classList.add('okay');
+  else el.classList.add('poor');
+  br.textContent = '($' + cash.toFixed(2) + ' − $' + tax.toFixed(2) + ' taxes) ÷ ' + pts.toLocaleString() + ' points = ' + Math.round(cpp) + '¢ per point';
+  pointsResult.classList.add('visible');
+}
+
+cashPriceInput.addEventListener('input', calculateCPM);
+pointsRequiredInput.addEventListener('input', calculatePointsValue);
+pointsTaxesInput.addEventListener('input', calculatePointsValue);
+pointsCashCompareInput.addEventListener('input', calculatePointsValue);
+  </script>
+</body>
+</html>

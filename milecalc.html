@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>pointdextro.us</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0a0a0b;--surface:#141416;--surface-elevated:#1c1c1f;--border:#2a2a2e;--text:#e8e8eb;--text-muted:#8a8a8f;--accent:#3b82f6;--accent-glow:rgba(59,130,246,0.15);--success:#22c55e;--warning:#f59e0b}
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{overflow-x:hidden;width:100%;height:100%;position:fixed;left:0;right:0}
+    body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100%;line-height:1.5;overflow-x:hidden;overflow-y:auto;width:100%;position:fixed;left:0;right:0;top:0;bottom:0;-webkit-overflow-scrolling:touch}
+    
+    /* Results bar */
+    .results-bar{position:sticky;top:0;left:0;right:0;z-index:100;background:linear-gradient(180deg,#1a1a2e 0%,#12121a 100%);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);transition:all 0.3s ease;margin-bottom:14px}
+    .results-bar::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--success),var(--accent));background-size:200% 100%;opacity:0;transition:opacity 0.3s}
+    .results-bar.has-results::before{opacity:1;animation:gradient-shift 3s ease-in-out infinite}
+    @keyframes gradient-shift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+    
+    .results-bar-inner{padding:16px 24px;position:relative}
+    .results-bar.has-results .results-bar-inner{padding-bottom:32px}
+    
+    .results-empty-state{color:var(--text);font-size:1.5rem;display:flex;align-items:center;justify-content:center;gap:12px;transition:opacity 0.3s ease,transform 0.3s ease}
+    .results-empty-state .plane-icon{font-size:24px;opacity:0.7;animation:gentle-float 4s ease-in-out infinite}
+    .results-empty-state .site-name{font-weight:700;letter-spacing:-0.03em;background:linear-gradient(135deg,#fff 0%,#a5b4fc 50%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    @keyframes gentle-float{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-2px) rotate(2deg)}}
+    
+    .reset-btn{position:absolute;left:calc(100% + 12px);top:50%;transform:translateY(-50%);background:transparent;border:1px solid var(--border);border-radius:6px;padding:6px;font-size:0;line-height:1;color:var(--text-muted);cursor:pointer;transition:all 0.15s;opacity:0;pointer-events:none;display:flex;align-items:center;justify-content:center}
+    .reset-btn:hover{color:var(--text);border-color:var(--text-muted);background:rgba(255,255,255,0.03)}
+    .reset-btn:active{transform:translateY(-50%) scale(0.95)}
+    .reset-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2}
+    .results-bar.has-results .reset-btn{opacity:1;pointer-events:auto}
+    
+    .results-content{opacity:0;transform:translateY(-8px);transition:opacity 0.4s ease,transform 0.4s ease;pointer-events:none;position:absolute;width:100%;left:0;top:0;padding:16px 24px}
+    .results-bar.has-results .results-empty-state{opacity:0;transform:translateY(8px);pointer-events:none}
+    .results-bar.has-results .results-content{opacity:1;transform:translateY(0);pointer-events:auto;position:relative;padding:0}
+    @keyframes fade-in{from{opacity:0}to{opacity:1}}
+    
+    /* Collapsed view */
+    .results-collapsed{display:flex;align-items:center;justify-content:center;padding:0 40px}
+    .results-hero{position:relative}
+    .results-hero-text{text-align:center}
+    .results-miles-row{position:relative;display:inline-block}
+    .results-miles{font-family:'JetBrains Mono',monospace;font-size:2.75rem;font-weight:500;letter-spacing:-0.03em;background:linear-gradient(135deg,#fff 0%,#a5b4fc 40%,var(--accent) 70%,var(--success) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;text-shadow:0 0 60px rgba(59,130,246,0.3)}
+    .results-label{font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:500;margin-top:4px}
+    
+    /* Expanded view - table */
+    .results-details{display:none;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06)}
+    .results-bar.expanded .results-details{display:block;animation:slide-down 0.25s ease-out}
+    @keyframes slide-down{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    
+    .results-table{width:100%;max-width:720px;margin:0 auto;border-collapse:collapse}
+    .results-table th{font-size:0.6rem;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);padding:0 10px 10px;text-align:right;cursor:default;position:relative}
+    .results-table th:first-child{text-align:left}
+    .results-table th[title]{border-bottom:1px dotted var(--text-muted)}
+    .results-table td{padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;text-align:right;border-top:1px solid rgba(255,255,255,0.04)}
+    .results-table td:first-child{text-align:left;font-weight:500}
+    .results-table tr:hover td{background:rgba(255,255,255,0.02)}
+    .results-table .segment-route{display:inline-flex;align-items:center;gap:6px}
+    .results-table .plane-icon{font-size:9px;opacity:0.4}
+    .results-table .total-row td{border-top:1px solid rgba(255,255,255,0.1);font-weight:500;padding-top:12px}
+    .results-table .total-row td.eqm-total{color:var(--accent)}
+    .results-table .total-row td.rdm-total{color:var(--success)}
+    .results-table .city-code{position:relative;cursor:default}
+    .results-table .city-code::after{content:attr(data-tooltip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--surface-elevated);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:0.6rem;font-family:'DM Sans',sans-serif;font-weight:400;white-space:nowrap;opacity:0;visibility:hidden;transition:all 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+    .results-table .city-code::before{content:'';position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--border);opacity:0;visibility:hidden;transition:all 0.15s ease}
+    .results-table .city-code:hover::after,.results-table .city-code:hover::before{opacity:1;visibility:visible}
+    
+    /* Toggle button */
+    .expand-toggle{position:absolute;bottom:0;left:50%;transform:translate(-50%,50%);background:linear-gradient(180deg,#1e1e2a 0%,#16161f 100%);border:1px solid var(--border);border-radius:50%;width:28px;height:28px;padding:0;cursor:pointer;color:var(--text-muted);display:none;align-items:center;justify-content:center;transition:all 0.2s ease;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:10}
+    .expand-toggle:hover{color:var(--text);background:linear-gradient(180deg,#252532 0%,#1a1a24 100%);border-color:rgba(255,255,255,0.1);transform:translate(-50%,50%) scale(1.05)}
+    .expand-toggle:active{transform:translate(-50%,50%) scale(0.95)}
+    .results-bar.has-results .expand-toggle{display:flex}
+    .expand-toggle .icon-plus,.expand-toggle .icon-minus{font-size:18px;font-weight:300;line-height:1;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+    .expand-toggle .icon-minus{display:none}
+    .results-bar.expanded .expand-toggle .icon-plus{display:none}
+    .results-bar.expanded .expand-toggle .icon-minus{display:flex}
+    
+    /* Main content */
+    .main-content{max-width:600px;margin:0 auto;padding:24px 24px 48px;position:relative;z-index:1}
+    
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;transition:border-color 0.2s,box-shadow 0.2s}
+    .card:focus-within{border-color:rgba(59,130,246,0.3);box-shadow:0 0 0 1px rgba(59,130,246,0.1)}
+    .card-header{display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:0.7rem;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted)}
+    .card-header::after{content:'';flex:1;height:1px;background:var(--border)}
+    .route-input-container{display:flex;flex-direction:column;gap:8px}
+    .route-input-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center}
+    .route-input{width:72px;flex-shrink:0}
+    .route-input input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 8px;font-family:'JetBrains Mono',monospace;font-size:1rem;color:var(--text);text-transform:uppercase;letter-spacing:0.05em;text-align:center;transition:border-color 0.15s,box-shadow 0.15s,transform 0.15s}
+    .route-input input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+    .route-input input.has-value{border-color:rgba(34,197,94,0.4);background:rgba(34,197,94,0.05)}
+    .route-input input.invalid{border-color:rgba(239,68,68,0.5);background:rgba(239,68,68,0.05)}
+    .route-input input::placeholder{color:var(--text-muted);opacity:0.4}
+    .route-arrow{color:var(--text-muted);font-size:0.85rem;flex-shrink:0;opacity:0.5;transition:opacity 0.2s,transform 0.2s}
+    .route-arrow.active{opacity:1;color:var(--accent)}
+    .route-helper{font-size:0.7rem;color:var(--text-muted);text-align:center;opacity:0.7}
+    .error-message{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:10px 14px;border-radius:8px;font-size:0.8rem;margin-top:12px;display:none;text-align:center}
+    .error-message.visible{display:block;animation:shake 0.3s ease-out}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+    
+    .segmented-control{display:flex;background:var(--bg);border-radius:10px;padding:4px;gap:4px}
+    .segmented-control input{display:none}
+    .segmented-control label{flex:1;text-align:center;padding:10px 4px;font-size:0.65rem;color:var(--text-muted);cursor:pointer;border-radius:7px;transition:all 0.2s;font-weight:500;line-height:1;display:flex;align-items:center;justify-content:center}
+    .segmented-control label:hover{color:var(--text);background:rgba(255,255,255,0.03)}
+    .segmented-control input:checked+label{color:var(--text)}
+    /* None - subtle dark */
+    .segmented-control input#elite-none:checked+label{background:linear-gradient(180deg,#2a2a2e 0%,#1c1c1f 100%)}
+    /* Silver - subtle silver */
+    .segmented-control input#elite-silver:checked+label{background:linear-gradient(180deg,#c0c0c0 0%,#888888 50%,#a8a8a8 100%);color:#1a1a1a;text-shadow:0 1px 0 rgba(255,255,255,0.3)}
+    /* Gold - warm gold metallic */
+    .segmented-control input#elite-gold:checked+label{background:linear-gradient(180deg,#d4a650 0%,#a67c28 50%,#c9a227 100%);color:#1a1400;text-shadow:0 1px 0 rgba(255,255,255,0.3)}
+    /* Platinum - cool silver metallic */
+    .segmented-control input#elite-platinum:checked+label{background:linear-gradient(180deg,#e8e8e8 0%,#a8a8a8 50%,#d0d0d0 100%);color:#1a1a1a;text-shadow:0 1px 0 rgba(255,255,255,0.5)}
+    /* Titanium - dark gunmetal metallic */
+    .segmented-control input#elite-titanium:checked+label{background:linear-gradient(180deg,#5a5a62 0%,#38383e 50%,#4a4a52 100%);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.4)}
+    
+    .form-row{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px}
+    .form-row:last-child{margin-bottom:0}
+    .form-group label{display:block;font-size:0.7rem;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.03em}
+    select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:1rem;color:var(--text);cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238a8a8f' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+    select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+    select option{background:var(--surface);color:var(--text)}
+    .pricing-toggle{display:flex;gap:4px;background:var(--bg);border-radius:8px;padding:4px;margin-bottom:12px}
+    .pricing-toggle button{flex:1;background:transparent;border:none;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:0.8rem;color:var(--text-muted);cursor:pointer;border-radius:6px;transition:all 0.15s}
+    .pricing-toggle button.active{background:var(--surface-elevated);color:var(--text)}
+    .pricing-toggle button:hover:not(.active){color:var(--text)}
+    .pricing-inputs{display:none}
+    .pricing-inputs.active{display:block}
+    .price-input-row{display:flex;gap:12px;align-items:flex-end}
+    .price-input-group{flex:1}
+    .price-input-group label{display:block;font-size:0.7rem;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.03em}
+    .price-input-group input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:1rem;color:var(--text);transition:border-color 0.15s,box-shadow 0.15s}
+    .price-input-group input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+    .price-input-group input::placeholder{color:var(--text-muted);opacity:0.4}
+    .cpm-result{margin-top:12px;padding:12px;background:var(--bg);border-radius:8px;display:none}
+    .cpm-result.visible{display:block;animation:fade-up 0.2s ease-out}
+    @keyframes fade-up{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+    .cpm-value{font-family:'JetBrains Mono',monospace;font-size:1.25rem;font-weight:500;margin-bottom:2px}
+    .cpm-value.good{color:var(--success)}
+    .cpm-value.okay{color:var(--warning)}
+    .cpm-value.poor{color:#ef4444}
+    .cpm-label{font-size:0.7rem;color:var(--text-muted)}
+    .cpm-breakdown{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:0.7rem;color:var(--text-muted)}
+    .info-note{margin-top:16px;padding:12px;background:var(--bg);border-radius:8px;font-size:0.65rem;color:var(--text-muted);line-height:1.5;text-align:center}
+    
+    @media(max-width:600px){
+      .results-bar-inner{padding:12px 16px}
+      .results-miles{font-size:2rem}
+      .reset-btn{left:calc(100% + 8px)}
+      .results-table{font-size:0.6rem}
+      .results-table th,.results-table td{padding:5px 4px}
+      .results-table th{font-size:0.45rem;letter-spacing:0.02em}
+      .results-table .segment-route{gap:4px}
+      .results-table .plane-icon{font-size:7px}
+      .main-content{padding:16px 16px 32px}
+      .form-row{grid-template-columns:1fr}
+      .segmented-control label{font-size:0.55rem;padding:8px 2px}
+    }
+  </style>
+</head>
+<body>
+  <div class="results-bar" id="resultsBar">
+    <div class="results-bar-inner">
+      <div class="results-empty-state"><span class="plane-icon">✈</span> <span class="site-name">pointdextro.us</span></div>
+      <div class="results-content">
+        <div class="results-collapsed">
+          <div class="results-hero">
+            <div class="results-hero-text">
+              <div class="results-miles-row">
+                <div class="results-miles" id="totalMiles">0</div>
+                <button class="reset-btn" id="resetBtn" title="Reset">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="results-label">redeemable miles</div>
+            </div>
+          </div>
+        </div>
+        <div class="results-details">
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>Segment</th>
+                <th>Distance</th>
+                <th>Fare Bonus</th>
+                <th>Elite Bonus</th>
+                <th title="Status Points (Elite Qualifying Miles)">EQM</th>
+                <th title="Redeemable Miles (Award Points)">RDM</th>
+              </tr>
+            </thead>
+            <tbody id="resultsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <button class="expand-toggle" id="expandToggle" title="Toggle details">
+      <span class="icon-plus">+</span>
+      <span class="icon-minus">−</span>
+    </button>
+  </div>
+
+  <div class="main-content">
+    <div class="card">
+      <div class="card-header">Route</div>
+      <div class="route-input-container">
+        <div class="route-input-row">
+          <div class="route-input"><input type="text" id="leg1" placeholder="SEA" maxlength="3" autocomplete="off"></div>
+          <span class="route-arrow" id="arrow1">→</span>
+          <div class="route-input"><input type="text" id="leg2" placeholder="NRT" maxlength="3" autocomplete="off"></div>
+          <span class="route-arrow" id="arrow2">→</span>
+          <div class="route-input"><input type="text" id="leg3" placeholder="" maxlength="3" autocomplete="off"></div>
+          <span class="route-arrow" id="arrow3">→</span>
+          <div class="route-input"><input type="text" id="leg4" placeholder="" maxlength="3" autocomplete="off"></div>
+          <span class="route-arrow" id="arrow4">→</span>
+          <div class="route-input"><input type="text" id="leg5" placeholder="" maxlength="3" autocomplete="off"></div>
+        </div>
+        <div class="route-helper">Up to 5 airports for multi-leg itineraries</div>
+      </div>
+      <div id="error-message" class="error-message"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Flight Details</div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label>Elite Status</label>
+        <div class="segmented-control" id="eliteControl">
+          <input type="radio" name="elite" id="elite-none" value="none" checked>
+          <label for="elite-none">None</label>
+          <input type="radio" name="elite" id="elite-silver" value="silver">
+          <label for="elite-silver">Silver</label>
+          <input type="radio" name="elite" id="elite-gold" value="gold">
+          <label for="elite-gold">Gold</label>
+          <input type="radio" name="elite" id="elite-platinum" value="platinum">
+          <label for="elite-platinum">Platinum</label>
+          <input type="radio" name="elite" id="elite-titanium" value="titanium">
+          <label for="elite-titanium">Titanium</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Operating Airline</label><select id="airline"></select></div>
+        <div class="form-group"><label>Fare Class</label><select id="fareClass"></select></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Pricing (Optional)</div>
+      <div class="pricing-toggle">
+        <button id="toggleCash" class="active">Cash (USD)</button>
+        <button id="togglePoints">Points Redemption</button>
+      </div>
+      <div id="cashInputs" class="pricing-inputs active">
+        <div class="price-input-row">
+          <div class="price-input-group"><label>Ticket Price (USD)</label><input type="text" id="cashPrice" placeholder="450.00" inputmode="decimal" autocomplete="off"></div>
+        </div>
+        <div id="cpmResult" class="cpm-result">
+          <div class="cpm-value" id="cpmValue">0¢</div>
+          <div class="cpm-label">cost per mile earned</div>
+          <div class="cpm-breakdown" id="cpmBreakdown"></div>
+        </div>
+      </div>
+      <div id="pointsInputs" class="pricing-inputs">
+        <div class="price-input-row">
+          <div class="price-input-group"><label>Points Required</label><input type="text" id="pointsRequired" placeholder="25,000" inputmode="numeric" autocomplete="off"></div>
+          <div class="price-input-group"><label>Taxes & Fees (USD)</label><input type="text" id="pointsTaxes" placeholder="50.00" inputmode="decimal" autocomplete="off"></div>
+        </div>
+        <div class="price-input-row" style="margin-top:12px">
+          <div class="price-input-group"><label>Compare to Cash Price (USD)</label><input type="text" id="pointsCashCompare" placeholder="850.00" inputmode="decimal" autocomplete="off"></div>
+        </div>
+        <div id="pointsResult" class="cpm-result">
+          <div class="cpm-value" id="pointsValue">0¢</div>
+          <div class="cpm-label">value per point redeemed</div>
+          <div class="cpm-breakdown" id="pointsBreakdown"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-note">
+      Based on official Atmos Rewards 2025 earning rates.<br>
+      <strong>EQM (Status Points)</strong> = Distance × Fare Class Rate (no elite bonus)<br>
+      <strong>RDM (Redeemable)</strong> = Distance × Fare Class Rate + Elite Bonus
+    </div>
+  </div>
+
+  <script>
+/**
+ * ATMOS REWARDS EARNING MODEL - Based on official Alaska Airlines documentation
+ * Source: https://www.alaskaair.com/atmosrewards/content/earn-points/flights
+ * 
+ * KEY RULES:
+ * 1. Status Points (EQM) = Base Miles × Total Fare Class Rate (base + bonus %)
+ * 2. Redeemable Miles (RDM) = (Base Miles × Total Fare Class Rate) + Elite Bonus
+ * 3. Elite bonuses apply ONLY to redeemable miles, NOT to status points
+ * 4. Elite bonuses are calculated on BASE miles only (not fare-class-adjusted miles)
+ */
+
+const earningPrograms = {
+  alaska: {
+    name: 'Alaska Atmos Rewards',
+    // Elite bonuses apply to BASE MILES for RDM only, NOT to EQM/Status Points
+    eliteBonuses: {
+      none: 0,
+      silver: 0.25,    // 25% bonus on base miles
+      gold: 0.50,      // 50% bonus on base miles  
+      platinum: 1.00,  // 100% bonus on base miles
+      titanium: 1.50   // 150% bonus on base miles
+    },
+    airlines: {
+      // ============================================
+      // ALASKA AIRLINES - booked via alaskaair.com
+      // Official rates from alaskaair.com/atmosrewards
+      // ============================================
+      AS: {
+        name: 'Alaska Airlines',
+        fareClasses: {
+          // FIRST CLASS
+          J: { base: 1.00, bonus: 1.00, total: 2.00, name: 'J - First Class (200%)' },
+          C: { base: 1.00, bonus: 0.75, total: 1.75, name: 'C - First Class (175%)' },
+          D: { base: 1.00, bonus: 0.50, total: 1.50, name: 'D/I - First Class (150%)' },
+          I: { base: 1.00, bonus: 0.50, total: 1.50, name: 'I - First Class (150%)' },
+          // ECONOMY - Full fare and premium
+          Y: { base: 1.00, bonus: 0.50, total: 1.50, name: 'Y - Econ Full Fare (150%)' },
+          B: { base: 1.00, bonus: 0.50, total: 1.50, name: 'B - Economy (150%)' },
+          H: { base: 1.00, bonus: 0.25, total: 1.25, name: 'H - Economy (125%)' },
+          K: { base: 1.00, bonus: 0.25, total: 1.25, name: 'K - Economy (125%)' },
+          // ECONOMY - Standard fares (100%)
+          M: { base: 1.00, bonus: 0, total: 1.00, name: 'M - Economy (100%)' },
+          L: { base: 1.00, bonus: 0, total: 1.00, name: 'L - Economy (100%)' },
+          V: { base: 1.00, bonus: 0, total: 1.00, name: 'V - Economy (100%)' },
+          S: { base: 1.00, bonus: 0, total: 1.00, name: 'S - Economy (100%)' },
+          N: { base: 1.00, bonus: 0, total: 1.00, name: 'N - Economy (100%)' },
+          Q: { base: 1.00, bonus: 0, total: 1.00, name: 'Q - Economy (100%)' },
+          O: { base: 1.00, bonus: 0, total: 1.00, name: 'O - Economy (100%)' },
+          G: { base: 1.00, bonus: 0, total: 1.00, name: 'G - Economy (100%)' },
+          // SAVER
+          X: { base: 0.30, bonus: 0, total: 0.30, name: 'X - Saver (30%)' }
+        }
+      },
+      
+      // ============================================
+      // HAWAIIAN AIRLINES - booked via hawaiianairlines.com
+      // Official rates from alaskaair.com/atmosrewards
+      // ============================================
+      HA: {
+        name: 'Hawaiian Airlines',
+        fareClasses: {
+          // DOMESTIC FIRST & INTERNATIONAL BUSINESS
+          F: { base: 1.00, bonus: 1.00, total: 2.00, name: 'F - First/Business (200%)' },
+          J: { base: 1.00, bonus: 1.00, total: 2.00, name: 'J - Business (200%)' },
+          P: { base: 1.00, bonus: 0.75, total: 1.75, name: 'P - Business (175%)' },
+          C: { base: 1.00, bonus: 0.50, total: 1.50, name: 'C - Business (150%)' },
+          A: { base: 1.00, bonus: 0.50, total: 1.50, name: 'A - Business (150%)' },
+          D: { base: 1.00, bonus: 0.50, total: 1.50, name: 'D - Business (150%)' },
+          // ECONOMY
+          Y: { base: 1.00, bonus: 0.50, total: 1.50, name: 'Y - Econ Full (150%)' },
+          W: { base: 1.00, bonus: 0.50, total: 1.50, name: 'W - Economy (150%)' },
+          X: { base: 1.00, bonus: 0.50, total: 1.50, name: 'X - Economy (150%)' },
+          Q: { base: 1.00, bonus: 0.25, total: 1.25, name: 'Q - Economy (125%)' },
+          V: { base: 1.00, bonus: 0.25, total: 1.25, name: 'V - Economy (125%)' },
+          B: { base: 1.00, bonus: 0.25, total: 1.25, name: 'B - Economy (125%)' },
+          S: { base: 1.00, bonus: 0.25, total: 1.25, name: 'S - Economy (125%)' },
+          // ECONOMY - Standard
+          N: { base: 1.00, bonus: 0, total: 1.00, name: 'N - Economy (100%)' },
+          M: { base: 1.00, bonus: 0, total: 1.00, name: 'M - Economy (100%)' },
+          I: { base: 1.00, bonus: 0, total: 1.00, name: 'I - Economy (100%)' },
+          H: { base: 1.00, bonus: 0, total: 1.00, name: 'H - Economy (100%)' },
+          G: { base: 1.00, bonus: 0, total: 1.00, name: 'G - Economy (100%)' },
+          K: { base: 1.00, bonus: 0, total: 1.00, name: 'K - Economy (100%)' },
+          L: { base: 1.00, bonus: 0, total: 1.00, name: 'L - Economy (100%)' },
+          Z: { base: 1.00, bonus: 0, total: 1.00, name: 'Z - Economy (100%)' },
+          O: { base: 1.00, bonus: 0, total: 1.00, name: 'O - Economy (100%)' },
+          // SAVER
+          U: { base: 0.30, bonus: 0, total: 0.30, name: 'U - Saver (30%)' }
+        }
+      },
+      
+      // ============================================
+      // PARTNER FLIGHTS BOOKED VIA ALASKA
+      // These get enhanced earning rates
+      // ============================================
+      PARTNER_VIA_AS: {
+        name: 'Partners (booked via Alaska)',
+        fareClasses: {
+          F_INTL: { base: 1.00, bonus: 2.50, total: 3.50, name: 'Int\'l First (350%)' },
+          J_INTL: { base: 1.00, bonus: 1.50, total: 2.50, name: 'Int\'l Business (250%)' },
+          F_DOM:  { base: 1.00, bonus: 0.50, total: 1.50, name: 'Domestic First (150%)' },
+          W:      { base: 1.00, bonus: 0.50, total: 1.50, name: 'Premium Economy (150%)' },
+          Y:      { base: 1.00, bonus: 0,    total: 1.00, name: 'Economy (100%)' },
+          Y_DISC: { base: 1.00, bonus: 0,    total: 1.00, name: 'Discount Economy (100%)' }
+        }
+      },
+      
+      // ============================================
+      // PARTNER FLIGHTS BOOKED VIA PARTNER SITE
+      // Lower earning rates than booking via Alaska
+      // ============================================
+      AA: {
+        name: 'American Airlines (partner site)',
+        fareClasses: {
+          F: { base: 1.00, bonus: 0.50, total: 1.50, name: 'First Class (150%)' },
+          J: { base: 1.00, bonus: 0.25, total: 1.25, name: 'Business (125%)' },
+          W: { base: 1.00, bonus: 0,    total: 1.00, name: 'Premium Economy (100%)' },
+          Y: { base: 0.50, bonus: 0,    total: 0.50, name: 'Economy (50%)' },
+          B: { base: 0.25, bonus: 0,    total: 0.25, name: 'Discount Economy (25%)' }
+        }
+      },
+      BA: {
+        name: 'British Airways (partner site)',
+        fareClasses: {
+          F: { base: 1.00, bonus: 0.50, total: 1.50, name: 'First Class (150%)' },
+          J: { base: 1.00, bonus: 0.25, total: 1.25, name: 'Club World (125%)' },
+          W: { base: 1.00, bonus: 0,    total: 1.00, name: 'World Traveller Plus (100%)' },
+          Y: { base: 0.50, bonus: 0,    total: 0.50, name: 'World Traveller (50%)' },
+          B: { base: 0.25, bonus: 0,    total: 0.25, name: 'Discount Economy (25%)' }
+        }
+      },
+      CX: {
+        name: 'Cathay Pacific (partner site)',
+        fareClasses: {
+          F: { base: 1.00, bonus: 0.50, total: 1.50, name: 'First Class (150%)' },
+          J: { base: 1.00, bonus: 0.25, total: 1.25, name: 'Business (125%)' },
+          W: { base: 1.00, bonus: 0,    total: 1.00, name: 'Premium Economy (100%)' },
+          Y: { base: 0.50, bonus: 0,    total: 0.50, name: 'Economy (50%)' },
+          B: { base: 0.25, bonus: 0,    total: 0.25, name: 'Discount Economy (25%)' }
+        }
+      },
+      EK: {
+        name: 'Emirates (partner site)',
+        fareClasses: {
+          F: { base: 1.00, bonus: 0.50, total: 1.50, name: 'First Class (150%)' },
+          J: { base: 1.00, bonus: 0.25, total: 1.25, name: 'Business (125%)' },
+          W: { base: 1.00, bonus: 0,    total: 1.00, name: 'Premium Economy (100%)' },
+          Y: { base: 0.50, bonus: 0,    total: 0.50, name: 'Economy (50%)' },
+          B: { base: 0.25, bonus: 0,    total: 0.25, name: 'Discount Economy (25%)' }
+        }
+      },
+      JL: {
+        name: 'Japan Airlines (partner site)',
+        fareClasses: {
+          F: { base: 1.00, bonus: 0.50, total: 1.50, name: 'First Class (150%)' },
+          J: { base: 1.00, bonus: 0.25, total: 1.25, name: 'Business (125%)' },
+          W: { base: 1.00, bonus: 0,    total: 1.00, name: 'Premium Economy (100%)' },
+          Y: { base: 0.50, bonus: 0,    total: 0.50, name: 'Economy (50%)' },
+          B: { base: 0.25, bonus: 0,    total: 0.25, name: 'Discount Economy (25%)' }
+        }
+      },
+      QF: {
+        name: 'Qantas (partner site)',
+        fareClasses: {
+          F: { base: 1.00, bonus: 0.50, total: 1.50, name: 'First Class (150%)' },
+          J: { base: 1.00, bonus: 0.25, total: 1.25, name: 'Business (125%)' },
+          W: { base: 1.00, bonus: 0,    total: 1.00, name: 'Premium Economy (100%)' },
+          Y: { base: 0.50, bonus: 0,    total: 0.50, name: 'Economy (50%)' },
+          B: { base: 0.25, bonus: 0,    total: 0.25, name: 'Discount Economy (25%)' }
+        }
+      },
+      KE: {
+        name: 'Korean Air (partner site)',
+        fareClasses: {
+          F: { base: 1.00, bonus: 0.50, total: 1.50, name: 'First Class (150%)' },
+          J: { base: 1.00, bonus: 0.25, total: 1.25, name: 'Prestige (125%)' },
+          W: { base: 1.00, bonus: 0,    total: 1.00, name: 'Premium Economy (100%)' },
+          Y: { base: 0.50, bonus: 0,    total: 0.50, name: 'Economy (50%)' },
+          B: { base: 0.25, bonus: 0,    total: 0.25, name: 'Discount Economy (25%)' }
+        }
+      },
+      SQ: {
+        name: 'Singapore Airlines (partner site)',
+        fareClasses: {
+          F: { base: 1.00, bonus: 0.50, total: 1.50, name: 'First/Suites (150%)' },
+          J: { base: 1.00, bonus: 0.25, total: 1.25, name: 'Business (125%)' },
+          W: { base: 1.00, bonus: 0,    total: 1.00, name: 'Premium Economy (100%)' },
+          Y: { base: 0.50, bonus: 0,    total: 0.50, name: 'Economy (50%)' },
+          B: { base: 0.25, bonus: 0,    total: 0.25, name: 'Discount Economy (25%)' }
+        }
+      },
+      FJ: {
+        name: 'Fiji Airways (partner site)',
+        fareClasses: {
+          F: { base: 1.00, bonus: 0.50, total: 1.50, name: 'First Class (150%)' },
+          J: { base: 1.00, bonus: 0.25, total: 1.25, name: 'Business (125%)' },
+          W: { base: 1.00, bonus: 0,    total: 1.00, name: 'Premium Economy (100%)' },
+          Y: { base: 0.50, bonus: 0,    total: 0.50, name: 'Economy (50%)' },
+          B: { base: 0.25, bonus: 0,    total: 0.25, name: 'Discount Economy (25%)' }
+        }
+      }
+    }
+  }
+};
+
+const airports={SEA:{lat:47.4502,lon:-122.3088,name:'Seattle-Tacoma'},SFO:{lat:37.6213,lon:-122.3790,name:'San Francisco'},LAX:{lat:33.9425,lon:-118.4081,name:'Los Angeles'},JFK:{lat:40.6413,lon:-73.7781,name:'New York JFK'},EWR:{lat:40.6895,lon:-74.1745,name:'Newark'},LGA:{lat:40.7769,lon:-73.8740,name:'LaGuardia'},ORD:{lat:41.9742,lon:-87.9073,name:"Chicago O'Hare"},DFW:{lat:32.8998,lon:-97.0403,name:'Dallas/Fort Worth'},IAH:{lat:29.9902,lon:-95.3368,name:'Houston Intercontinental'},MIA:{lat:25.7959,lon:-80.2870,name:'Miami'},ATL:{lat:33.6407,lon:-84.4277,name:'Atlanta'},DEN:{lat:39.8561,lon:-104.6737,name:'Denver'},PHX:{lat:33.4373,lon:-112.0078,name:'Phoenix'},LAS:{lat:36.0840,lon:-115.1537,name:'Las Vegas'},PDX:{lat:45.5898,lon:-122.5951,name:'Portland'},SAN:{lat:32.7338,lon:-117.1933,name:'San Diego'},SJC:{lat:37.3639,lon:-121.9289,name:'San Jose'},BOS:{lat:42.3656,lon:-71.0096,name:'Boston'},IAD:{lat:38.9531,lon:-77.4565,name:'Washington Dulles'},DCA:{lat:38.8512,lon:-77.0402,name:'Washington Reagan'},MSP:{lat:44.8848,lon:-93.2223,name:'Minneapolis'},DTW:{lat:42.2162,lon:-83.3554,name:'Detroit'},PHL:{lat:39.8729,lon:-75.2437,name:'Philadelphia'},CLT:{lat:35.2140,lon:-80.9431,name:'Charlotte'},MCO:{lat:28.4312,lon:-81.3081,name:'Orlando'},TPA:{lat:27.9756,lon:-82.5333,name:'Tampa'},FLL:{lat:26.0742,lon:-80.1506,name:'Fort Lauderdale'},AUS:{lat:30.1975,lon:-97.6664,name:'Austin'},MSY:{lat:29.9934,lon:-90.2580,name:'New Orleans'},RDU:{lat:35.8801,lon:-78.7880,name:'Raleigh-Durham'},BWI:{lat:39.1774,lon:-76.6684,name:'Baltimore'},SLC:{lat:40.7899,lon:-111.9791,name:'Salt Lake City'},HNL:{lat:21.3187,lon:-157.9225,name:'Honolulu'},OGG:{lat:20.8986,lon:-156.4305,name:'Maui Kahului'},KOA:{lat:19.7388,lon:-156.0456,name:'Kona'},LIH:{lat:21.9770,lon:-159.3390,name:'Lihue, Kauai'},ANC:{lat:61.1743,lon:-149.9962,name:'Anchorage'},YVR:{lat:49.1967,lon:-123.1815,name:'Vancouver'},YYZ:{lat:43.6777,lon:-79.6248,name:'Toronto Pearson'},YUL:{lat:45.4706,lon:-73.7408,name:'Montreal'},MEX:{lat:19.4363,lon:-99.0721,name:'Mexico City'},CUN:{lat:21.0365,lon:-86.8771,name:'Cancun'},GDL:{lat:20.5218,lon:-103.3111,name:'Guadalajara'},SJD:{lat:23.1518,lon:-109.7211,name:'Los Cabos'},PVR:{lat:20.6801,lon:-105.2544,name:'Puerto Vallarta'},LHR:{lat:51.4700,lon:-0.4543,name:'London Heathrow'},LGW:{lat:51.1537,lon:-0.1821,name:'London Gatwick'},CDG:{lat:49.0097,lon:2.5479,name:'Paris Charles de Gaulle'},FRA:{lat:50.0379,lon:8.5622,name:'Frankfurt'},AMS:{lat:52.3105,lon:4.7683,name:'Amsterdam Schiphol'},MUC:{lat:48.3537,lon:11.7750,name:'Munich'},FCO:{lat:41.8003,lon:12.2389,name:'Rome Fiumicino'},MAD:{lat:40.4983,lon:-3.5676,name:'Madrid'},BCN:{lat:41.2974,lon:2.0833,name:'Barcelona'},ZRH:{lat:47.4647,lon:8.5492,name:'Zurich'},VIE:{lat:48.1103,lon:16.5697,name:'Vienna'},CPH:{lat:55.6180,lon:12.6508,name:'Copenhagen'},ARN:{lat:59.6498,lon:17.9238,name:'Stockholm Arlanda'},OSL:{lat:60.1976,lon:11.1004,name:'Oslo'},HEL:{lat:60.3172,lon:24.9633,name:'Helsinki'},DUB:{lat:53.4264,lon:-6.2499,name:'Dublin'},EDI:{lat:55.9508,lon:-3.3615,name:'Edinburgh'},LIS:{lat:38.7756,lon:-9.1354,name:'Lisbon'},ATH:{lat:37.9364,lon:23.9445,name:'Athens'},IST:{lat:41.2753,lon:28.7519,name:'Istanbul'},NRT:{lat:35.7720,lon:140.3929,name:'Tokyo Narita'},HND:{lat:35.5494,lon:139.7798,name:'Tokyo Haneda'},KIX:{lat:34.4347,lon:135.2441,name:'Osaka Kansai'},ICN:{lat:37.4602,lon:126.4407,name:'Seoul Incheon'},HKG:{lat:22.3080,lon:113.9185,name:'Hong Kong'},SIN:{lat:1.3644,lon:103.9915,name:'Singapore Changi'},BKK:{lat:13.6900,lon:100.7501,name:'Bangkok'},TPE:{lat:25.0797,lon:121.2342,name:'Taipei Taoyuan'},PVG:{lat:31.1443,lon:121.8083,name:'Shanghai Pudong'},PEK:{lat:40.0799,lon:116.6031,name:'Beijing Capital'},DEL:{lat:28.5562,lon:77.1000,name:'Delhi'},BOM:{lat:19.0896,lon:72.8656,name:'Mumbai'},SYD:{lat:-33.9399,lon:151.1753,name:'Sydney'},MEL:{lat:-37.6690,lon:144.8410,name:'Melbourne'},BNE:{lat:-27.3942,lon:153.1218,name:'Brisbane'},AKL:{lat:-37.0082,lon:174.7850,name:'Auckland'},NAN:{lat:-17.7554,lon:177.4431,name:'Nadi, Fiji'},MNL:{lat:14.5086,lon:121.0194,name:'Manila'},KUL:{lat:2.7456,lon:101.7099,name:'Kuala Lumpur'},CGK:{lat:-6.1256,lon:106.6559,name:'Jakarta'},DXB:{lat:25.2532,lon:55.3657,name:'Dubai'},AUH:{lat:24.4330,lon:54.6511,name:'Abu Dhabi'},DOH:{lat:25.2609,lon:51.6138,name:'Doha'},TLV:{lat:32.0055,lon:34.8854,name:'Tel Aviv'},GRU:{lat:-23.4356,lon:-46.4731,name:'São Paulo'},EZE:{lat:-34.8222,lon:-58.5358,name:'Buenos Aires'},SCL:{lat:-33.3930,lon:-70.7858,name:'Santiago'},BOG:{lat:4.7016,lon:-74.1469,name:'Bogotá'},LIM:{lat:-12.0219,lon:-77.1143,name:'Lima'},JNB:{lat:-26.1367,lon:28.2411,name:'Johannesburg'},CPT:{lat:-33.9715,lon:18.6021,name:'Cape Town'},CAI:{lat:30.1219,lon:31.4056,name:'Cairo'},CMN:{lat:33.3675,lon:-7.5898,name:'Casablanca'}};
+
+function toRadians(d){return d*(Math.PI/180)}
+function calculateDistance(o,d){const R=3440.065,lat1=toRadians(airports[o].lat),lat2=toRadians(airports[d].lat),dLat=toRadians(airports[d].lat-airports[o].lat),dLon=toRadians(airports[d].lon-airports[o].lon),a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)*Math.sin(dLon/2);return Math.round(2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))*R*1.15078)}
+
+const legInputs=[document.getElementById('leg1'),document.getElementById('leg2'),document.getElementById('leg3'),document.getElementById('leg4'),document.getElementById('leg5')];
+const arrows=[document.getElementById('arrow1'),document.getElementById('arrow2'),document.getElementById('arrow3'),document.getElementById('arrow4')];
+const airlineSelect=document.getElementById('airline'),fareClassSelect=document.getElementById('fareClass'),resultsBar=document.getElementById('resultsBar'),errorMessage=document.getElementById('error-message'),resultsTableBody=document.getElementById('resultsTableBody');
+const expandToggle=document.getElementById('expandToggle');
+const program=earningPrograms.alaska;
+
+let isExpanded=window.innerWidth>600;
+function updateExpandedState(){
+  resultsBar.classList.toggle('expanded',isExpanded);
+}
+updateExpandedState();
+
+expandToggle.addEventListener('click',()=>{isExpanded=!isExpanded;updateExpandedState()});
+window.addEventListener('resize',()=>{if(window.innerWidth>600&&!isExpanded){isExpanded=true;updateExpandedState()}});
+
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  legInputs.forEach(i=>{i.value='';i.classList.remove('has-value','invalid')});
+  arrows.forEach(a=>a.classList.remove('active'));
+  document.getElementById('elite-none').checked=true;
+  airlineSelect.selectedIndex=0;
+  populateFareClasses();
+  cashPriceInput.value='';
+  pointsRequiredInput.value='';
+  pointsTaxesInput.value='';
+  pointsCashCompareInput.value='';
+  cpmResult.classList.remove('visible');
+  pointsResult.classList.remove('visible');
+  resultsBar.classList.remove('has-results');
+  hideError();
+  legInputs[0].focus()
+});
+
+function getEliteStatus(){return document.querySelector('input[name="elite"]:checked').value}
+
+function populateAirlines(){
+  airlineSelect.innerHTML='';
+  Object.entries(program.airlines).forEach(([c,a])=>{const o=document.createElement('option');o.value=c;o.textContent=c+' - '+a.name;airlineSelect.appendChild(o)});
+  populateFareClasses()
+}
+
+function populateFareClasses(){
+  const a=program.airlines[airlineSelect.value];
+  fareClassSelect.innerHTML='';
+  Object.entries(a.fareClasses).forEach(([c,f])=>{
+    const o=document.createElement('option');
+    o.value=c;
+    o.textContent=f.name;
+    fareClassSelect.appendChild(o)
+  });
+  calculate()
+}
+
+function showError(m){errorMessage.textContent=m;errorMessage.classList.add('visible');resultsBar.classList.remove('has-results')}
+function hideError(){errorMessage.classList.remove('visible')}
+
+function updateArrows(){
+  legInputs.forEach((i)=>{
+    const val=i.value.trim(),len=val.length;
+    i.classList.remove('has-value','invalid');
+    if(len===3){airports[val.toUpperCase()]?i.classList.add('has-value'):i.classList.add('invalid')}
+  });
+  arrows.forEach((a,x)=>{
+    const prev=legInputs[x].value.trim(),next=legInputs[x+1].value.trim();
+    a.classList.toggle('active',prev.length===3&&next.length===3&&airports[prev.toUpperCase()]&&airports[next.toUpperCase()])
+  })
+}
+
+function getAirports(){
+  const codes=[];
+  for(const i of legInputs){const code=i.value.toUpperCase().trim();if(code.length===3)codes.push(code)}
+  return codes
+}
+
+/**
+ * CORE CALCULATION LOGIC
+ * 
+ * According to official Atmos Rewards documentation:
+ * 
+ * For Alaska/Hawaiian flights booked via alaskaair.com:
+ * - Status Points (EQM) = Distance × Total Rate (Base + Bonus)
+ * - Redeemable Miles (RDM) = Distance × Total Rate + Elite Bonus (on base distance)
+ * 
+ * Elite bonus is applied to BASE MILES only and does NOT count toward EQM/Status Points
+ */
+function calculate(){
+  updateArrows();
+  const codes=getAirports();
+  if(codes.length<2){hideError();resultsBar.classList.remove('has-results');return}
+  for(const c of codes){if(!airports[c]){showError('Unknown airport code: '+c);return}}
+  hideError();
+  
+  const airline = program.airlines[airlineSelect.value];
+  const fareClass = airline.fareClasses[fareClassSelect.value];
+  const eliteStatus = getEliteStatus();
+  const eliteBonusRate = program.eliteBonuses[eliteStatus];
+  
+  const segs=[];
+  let totalDist=0, totalFareBonus=0, totalEliteBonus=0, totalEQM=0, totalRDM=0;
+  
+  for(let i=0;i<codes.length-1;i++){
+    const o=codes[i], d=codes[i+1];
+    const dist = calculateDistance(o,d);
+    
+    // Calculate fare class adjusted miles (applies to both EQM and RDM)
+    const fareAdjustedMiles = Math.round(dist * fareClass.total);
+    const fareBonusMiles = fareAdjustedMiles - dist;
+    
+    // Elite bonus: applies to BASE distance only, for RDM only (NOT EQM)
+    const eliteBonusMiles = Math.round(dist * eliteBonusRate);
+    
+    // EQM (Status Points) = fare-adjusted miles (NO elite bonus)
+    const eqm = fareAdjustedMiles;
+    
+    // RDM (Redeemable Miles) = fare-adjusted miles + elite bonus
+    const rdm = fareAdjustedMiles + eliteBonusMiles;
+    
+    totalDist += dist;
+    totalFareBonus += fareBonusMiles;
+    totalEliteBonus += eliteBonusMiles;
+    totalEQM += eqm;
+    totalRDM += rdm;
+    
+    segs.push({
+      origin: o,
+      destination: d,
+      originName: airports[o].name,
+      destName: airports[d].name,
+      distance: dist,
+      fareBonus: fareBonusMiles,
+      eliteBonus: eliteBonusMiles,
+      eqm: eqm,
+      rdm: rdm
+    });
+  }
+  
+  document.getElementById('totalMiles').textContent = totalRDM.toLocaleString();
+  
+  let tableHtml = segs.map(s => `<tr>
+    <td><span class="segment-route"><span class="city-code" data-tooltip="${s.originName}">${s.origin}</span><span class="plane-icon">✈</span><span class="city-code" data-tooltip="${s.destName}">${s.destination}</span></span></td>
+    <td>${s.distance.toLocaleString()}</td>
+    <td>${s.fareBonus >= 0 ? '+' : ''}${s.fareBonus.toLocaleString()}</td>
+    <td>+${s.eliteBonus.toLocaleString()}</td>
+    <td>${s.eqm.toLocaleString()}</td>
+    <td>${s.rdm.toLocaleString()}</td>
+  </tr>`).join('');
+  
+  tableHtml += `<tr class="total-row">
+    <td>Total</td>
+    <td>${totalDist.toLocaleString()}</td>
+    <td>${totalFareBonus >= 0 ? '+' : ''}${totalFareBonus.toLocaleString()}</td>
+    <td>+${totalEliteBonus.toLocaleString()}</td>
+    <td class="eqm-total">${totalEQM.toLocaleString()}</td>
+    <td class="rdm-total">${totalRDM.toLocaleString()}</td>
+  </tr>`;
+  
+  resultsTableBody.innerHTML = tableHtml;
+  resultsBar.classList.add('has-results');
+}
+
+airlineSelect.addEventListener('change',populateFareClasses);
+fareClassSelect.addEventListener('change',calculate);
+document.querySelectorAll('input[name="elite"]').forEach(r=>r.addEventListener('change',calculate));
+
+legInputs.forEach((i,x)=>{
+  i.addEventListener('input',()=>{i.value=i.value.toUpperCase();calculate();if(i.value.length===3&&x<legInputs.length-1)legInputs[x+1].focus()});
+  i.addEventListener('keydown',e=>{if(e.key==='Backspace'&&i.value===''&&x>0)legInputs[x-1].focus()})
+});
+
+populateAirlines();
+
+const toggleCash=document.getElementById('toggleCash'),togglePoints=document.getElementById('togglePoints'),cashInputs=document.getElementById('cashInputs'),pointsInputs=document.getElementById('pointsInputs'),cashPriceInput=document.getElementById('cashPrice'),pointsRequiredInput=document.getElementById('pointsRequired'),pointsTaxesInput=document.getElementById('pointsTaxes'),pointsCashCompareInput=document.getElementById('pointsCashCompare'),cpmResult=document.getElementById('cpmResult'),pointsResult=document.getElementById('pointsResult');
+toggleCash.addEventListener('click',()=>{toggleCash.classList.add('active');togglePoints.classList.remove('active');cashInputs.classList.add('active');pointsInputs.classList.remove('active')});
+togglePoints.addEventListener('click',()=>{togglePoints.classList.add('active');toggleCash.classList.remove('active');pointsInputs.classList.add('active');cashInputs.classList.remove('active')});
+function parseCurrency(v){return v?parseFloat(v.replace(/[$,]/g,''))||0:0}
+function parsePoints(v){return v?parseInt(v.replace(/,/g,''))||0:0}
+function getCurrentTotalMiles(){const el=document.getElementById('totalMiles');return el?parseInt(el.textContent.replace(/,/g,''))||0:0}
+function calculateCPM(){const m=getCurrentTotalMiles(),p=parseCurrency(cashPriceInput.value);if(!m||!p){cpmResult.classList.remove('visible');return}const cpm=(p/m)*100,el=document.getElementById('cpmValue'),br=document.getElementById('cpmBreakdown');el.textContent=Math.round(cpm)+'¢';el.classList.remove('good','okay','poor');if(cpm<5)el.classList.add('good');else if(cpm<10)el.classList.add('okay');else el.classList.add('poor');br.textContent='$'+p.toFixed(2)+' ÷ '+m.toLocaleString()+' miles = '+Math.round(cpm)+'¢ per mile';cpmResult.classList.add('visible')}
+function calculatePointsValue(){const pts=parsePoints(pointsRequiredInput.value),tax=parseCurrency(pointsTaxesInput.value),cash=parseCurrency(pointsCashCompareInput.value);if(!pts||!cash){pointsResult.classList.remove('visible');return}const cpp=((cash-tax)/pts)*100,el=document.getElementById('pointsValue'),br=document.getElementById('pointsBreakdown');el.textContent=Math.round(cpp)+'¢';el.classList.remove('good','okay','poor');if(cpp>=1.5)el.classList.add('good');else if(cpp>=1.0)el.classList.add('okay');else el.classList.add('poor');br.textContent='($'+cash.toFixed(2)+' − $'+tax.toFixed(2)+' taxes) ÷ '+pts.toLocaleString()+' points = '+Math.round(cpp)+'¢ per point';pointsResult.classList.add('visible')}
+cashPriceInput.addEventListener('input',calculateCPM);
+pointsRequiredInput.addEventListener('input',calculatePointsValue);
+pointsTaxesInput.addEventListener('input',calculatePointsValue);
+pointsCashCompareInput.addEventListener('input',calculatePointsValue);
+
+// Wrap calculate to also update pricing calculations when miles change
+const origCalc = calculate;
+calculate = function(){
+  origCalc();
+  calculateCPM();
+  calculatePointsValue();
+};
+  </script>
+</body>
+</html>

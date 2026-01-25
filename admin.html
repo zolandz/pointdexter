@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Earning Rules | pointdextro.us</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0b;
+      --surface: #141416;
+      --surface-elevated: #1c1c1f;
+      --border: #2a2a2e;
+      --text: #e8e8eb;
+      --text-muted: #8a8a8f;
+      --accent: #3b82f6;
+      --accent-glow: rgba(59,130,246,0.15);
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .header {
+      background: linear-gradient(180deg, #1a1a2e 0%, #12121a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .site-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #fff 0%, #a5b4fc 50%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+    }
+
+    .page-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding-left: 16px;
+      border-left: 1px solid var(--border);
+    }
+
+    .header-meta {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .header-meta a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .header-meta a:hover {
+      text-decoration: underline;
+    }
+
+    .main-content {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* Calculation Rules */
+    .rules-summary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .rules-summary h2 {
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .rule-item {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+
+    .rule-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .rule-label {
+      font-weight: 600;
+      color: var(--accent);
+      min-width: 40px;
+    }
+
+    .rule-label.rdm {
+      color: var(--success);
+    }
+
+    /* Elite Tiers */
+    .elite-section {
+      margin-bottom: 24px;
+    }
+
+    .section-header {
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-header::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .elite-tiers {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .elite-tier {
+      padding: 16px;
+      border-radius: 10px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .elite-tier-name {
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .elite-tier-bonus {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.25rem;
+      font-weight: 500;
+    }
+
+    .elite-tier-note {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Airline Cards */
+    .airline-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .airline-header {
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .airline-header:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .airline-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .airline-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: var(--bg);
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+
+    .airline-name {
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .airline-channel {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .toggle-icon {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+
+    .airline-card.expanded .toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    .airline-content {
+      display: none;
+      padding: 0 20px 20px;
+    }
+
+    .airline-card.expanded .airline-content {
+      display: block;
+    }
+
+    /* Cabin Sections */
+    .cabin-section {
+      margin-bottom: 16px;
+    }
+
+    .cabin-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .cabin-header {
+      font-size: 0.65rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      padding-left: 4px;
+    }
+
+    /* Fare Class Tables */
+    .fare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .fare-table th {
+      font-size: 0.6rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-muted);
+      padding: 8px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+
+    .fare-table th.numeric {
+      text-align: right;
+    }
+
+    .fare-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .fare-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .fare-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .fare-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .fare-name {
+      color: var(--text);
+    }
+
+    .fare-table td.numeric {
+      text-align: right;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .fare-table .total-col {
+      color: var(--success);
+      font-weight: 500;
+    }
+
+    .fare-table .bonus-col {
+      color: var(--warning);
+    }
+
+    /* Rate badges */
+    .rate-high { color: var(--success); }
+    .rate-mid { color: var(--warning); }
+    .rate-low { color: #ef4444; }
+
+    /* Back link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      margin-bottom: 16px;
+      transition: color 0.15s;
+    }
+
+    .back-link:hover {
+      color: var(--text);
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .header-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .header-meta {
+        text-align: left;
+      }
+
+      .page-title {
+        padding-left: 0;
+        border-left: none;
+        margin-top: 4px;
+      }
+
+      .header-left {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+
+      .elite-tiers {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .fare-table {
+        font-size: 0.75rem;
+      }
+
+      .fare-table th, .fare-table td {
+        padding: 8px;
+      }
+
+      .airline-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <a href="index.html" class="site-name">pointdextro.us</a>
+        <span class="page-title">Earning Rules Reference</span>
+      </div>
+      <div class="header-meta" id="headerMeta">
+        Loading...
+      </div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <a href="index.html" class="back-link">← Back to Calculator</a>
+
+    <div class="rules-summary" id="rulesSummary">
+      <h2>Calculation Rules</h2>
+      <div id="rulesContent"></div>
+    </div>
+
+    <div class="elite-section">
+      <div class="section-header">Elite Status Bonuses</div>
+      <div class="elite-tiers" id="eliteTiers"></div>
+    </div>
+
+    <div class="section-header">Airlines & Fare Classes</div>
+    <div id="airlinesContainer"></div>
+  </div>
+
+  <script type="module">
+import { earningPrograms, RULES_META, getCabinDisplayName, getFareClassesByCabin, getCabinsForAirline } from './data/earning-rules.js';
+
+// Use Alaska program
+const program = earningPrograms.alaska;
+
+// Render header meta
+document.getElementById('headerMeta').innerHTML = `
+  Version ${RULES_META.version} | Updated ${RULES_META.lastUpdated}<br>
+  <a href="${RULES_META.source}" target="_blank">Official Source</a>
+`;
+
+// Render calculation rules
+document.getElementById('rulesContent').innerHTML = `
+  <div class="rule-item">
+    <span class="rule-label">EQM</span>
+    <span>${program.calculationRules.eqm}</span>
+  </div>
+  <div class="rule-item">
+    <span class="rule-label rdm">RDM</span>
+    <span>${program.calculationRules.rdm}</span>
+  </div>
+`;
+
+// Render elite tiers
+const eliteTiersHtml = Object.entries(program.eliteBonuses).map(([key, rate]) => {
+  const tier = program.eliteTiers[key];
+  const bonusText = rate === 0 ? '0%' : `+${Math.round(rate * 100)}%`;
+  return `
+    <div class="elite-tier" style="${tier.style}">
+      <div class="elite-tier-name">${tier.name}</div>
+      <div class="elite-tier-bonus">${bonusText}</div>
+      <div class="elite-tier-note">on base miles</div>
+    </div>
+  `;
+}).join('');
+
+document.getElementById('eliteTiers').innerHTML = eliteTiersHtml;
+
+// Render airlines
+function formatPercent(rate) {
+  const pct = Math.round(rate * 100);
+  return pct + '%';
+}
+
+function getRateClass(total) {
+  if (total >= 1.5) return 'rate-high';
+  if (total >= 1.0) return 'rate-mid';
+  return 'rate-low';
+}
+
+function renderAirline(code, airline) {
+  const cabins = getCabinsForAirline('alaska', code);
+  const fareClassesByCabin = getFareClassesByCabin('alaska', code);
+
+  const cabinSectionsHtml = cabins.map(cabin => {
+    const fareClasses = fareClassesByCabin[cabin] || [];
+    if (fareClasses.length === 0) return '';
+
+    const rowsHtml = fareClasses.map(fc => `
+      <tr>
+        <td><span class="fare-code">${fc.code}</span></td>
+        <td class="fare-name">${fc.name.replace(/^[A-Z_]+ - /, '').replace(/ \(\d+%\)$/, '')}</td>
+        <td class="numeric">${formatPercent(fc.base)}</td>
+        <td class="numeric bonus-col">${fc.bonus > 0 ? '+' + formatPercent(fc.bonus) : '0%'}</td>
+        <td class="numeric total-col ${getRateClass(fc.total)}">${formatPercent(fc.total)}</td>
+      </tr>
+    `).join('');
+
+    return `
+      <div class="cabin-section">
+        <div class="cabin-header">${getCabinDisplayName(cabin)}</div>
+        <table class="fare-table">
+          <thead>
+            <tr>
+              <th style="width: 60px">Code</th>
+              <th>Description</th>
+              <th class="numeric" style="width: 80px">Base</th>
+              <th class="numeric" style="width: 80px">Bonus</th>
+              <th class="numeric" style="width: 80px">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="airline-card" data-airline="${code}">
+      <div class="airline-header" onclick="this.parentElement.classList.toggle('expanded')">
+        <div class="airline-info">
+          <span class="airline-code">${code}</span>
+          <div>
+            <div class="airline-name">${airline.name}</div>
+            <div class="airline-channel">booked via ${airline.bookingChannel}</div>
+          </div>
+        </div>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="airline-content">
+        ${cabinSectionsHtml}
+      </div>
+    </div>
+  `;
+}
+
+const airlinesHtml = Object.entries(program.airlines).map(([code, airline]) => {
+  return renderAirline(code, airline);
+}).join('');
+
+document.getElementById('airlinesContainer').innerHTML = airlinesHtml;
+
+// Expand first airline by default
+document.querySelector('.airline-card')?.classList.add('expanded');
+  </script>
+</body>
+</html>
