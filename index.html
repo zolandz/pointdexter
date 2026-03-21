@@ -25,8 +25,8 @@
 
     .results-empty-state{color:var(--text);font-size:1.5rem;display:flex;align-items:center;justify-content:center;gap:12px;transition:opacity 0.3s ease,transform 0.3s ease}
     .results-empty-state .plane-icon{opacity:0.85;animation:gentle-float 4s ease-in-out infinite;display:flex;align-items:center}
-    .results-empty-state .plane-icon svg{width:28px;height:28px;fill:url(#plane-gradient)}
-    .results-empty-state .site-name{font-family:'praxis-next',sans-serif;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;font-size:1.2rem;background:linear-gradient(135deg,#fff 0%,#6ee7b7 35%,#a5b4fc 65%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .results-empty-state .plane-icon svg{width:1.6rem;height:1.6rem;fill:url(#plane-gradient)}
+    .results-empty-state .site-name{font-family:'praxis-next',sans-serif;font-weight:900;font-style:italic;letter-spacing:0.08em;text-transform:uppercase;font-size:1.2rem;background:linear-gradient(135deg,#fff 0%,#6ee7b7 35%,#a5b4fc 65%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
     @keyframes gentle-float{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-2px) rotate(2deg)}}
 
     .reset-btn{position:absolute;left:calc(100% + 12px);top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.08);border:none;border-radius:50%;padding:6px;font-size:0;line-height:1;color:var(--text-muted);cursor:pointer;transition:all 0.15s;opacity:0;pointer-events:none;display:flex;align-items:center;justify-content:center}
@@ -103,7 +103,7 @@
     .route-input.new-field,.route-arrow.new-field{animation:field-appear 0.3s ease-out}
     @keyframes field-appear{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
     /* Route reset button */
-    .route-reset-btn{background:transparent;border:none;padding:4px;color:var(--text-muted);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;border-radius:4px;opacity:0.6;order:2}
+    .route-reset-btn{background:rgba(255,255,255,0.08);border:none;padding:6px;color:var(--text-muted);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;border-radius:50%;opacity:0.6;order:99;flex-shrink:0}
     .route-reset-btn:disabled{cursor:default;opacity:0.15}
     .route-reset-btn:not(:disabled):hover{color:var(--text);background:rgba(255,255,255,0.05);opacity:1}
     .route-reset-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2}
@@ -176,7 +176,7 @@
 <body>
   <div class="results-bar" id="resultsBar">
     <div class="results-bar-inner">
-      <div class="results-empty-state"><span class="plane-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="plane-gradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fff"/><stop offset="35%" stop-color="#6ee7b7"/><stop offset="65%" stop-color="#a5b4fc"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient></defs><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></span> <span class="site-name">Pointdexter</span></div>
+      <div class="results-empty-state"><span class="site-name">Pointdexter</span></div>
       <div class="results-content">
         <div class="results-collapsed">
           <div class="results-hero">
@@ -218,14 +218,6 @@
 
   <div class="main-content">
     <div class="card">
-      <div class="card-header">Route
-        <button class="route-reset-btn" id="routeResetBtn" title="Clear route">
-          <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-            <path d="M3 3v5h5"/>
-          </svg>
-        </button>
-      </div>
       <div class="route-input-container">
         <div class="route-input-row" id="routeInputRow">
           <div class="route-input"><input type="text" id="leg1" placeholder="SEA" maxlength="3" autocomplete="off"></div>
@@ -233,6 +225,12 @@
           <div class="route-input"><input type="text" id="leg2" placeholder="NRT" maxlength="3" autocomplete="off"></div>
           <span class="route-arrow" id="arrow2">→</span>
           <div class="route-input"><input type="text" id="leg3" placeholder="" maxlength="3" autocomplete="off"></div>
+          <button class="route-reset-btn" id="routeResetBtn" title="Clear route">
+            <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+          </button>
         </div>
       </div>
       <div id="error-message" class="error-message"></div>

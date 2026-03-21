@@ -1,0 +1,30 @@
+{
+  "date": "2026-03-21",
+  "url": "http://localhost:8080",
+  "designScore": "A-",
+  "aiSlopScore": "A",
+  "categoryGrades": {
+    "hierarchy": "B",
+    "typography": "B+",
+    "color": "A",
+    "spacing": "A",
+    "interaction": "B",
+    "responsive": "B+",
+    "content": "B+",
+    "aiSlop": "A",
+    "motion": "A",
+    "performance": "A"
+  },
+  "findings": [
+    {"id": "FINDING-001", "title": "user-scalable=no blocks pinch-to-zoom", "impact": "high", "category": "responsive", "status": "fixed"},
+    {"id": "FINDING-002", "title": "No semantic headings", "impact": "high", "category": "hierarchy", "status": "deferred"},
+    {"id": "FINDING-003", "title": "Undersized touch targets", "impact": "high", "category": "interaction", "status": "fixed"},
+    {"id": "FINDING-004", "title": "body position:fixed breaks native scroll", "impact": "high", "category": "responsive", "status": "deferred"},
+    {"id": "FINDING-005", "title": "milecalc.html near-duplicate of index.html", "impact": "medium", "category": "content", "status": "deferred"},
+    {"id": "FINDING-006", "title": "Card header line decoration inconsistency", "impact": "medium", "category": "spacing", "status": "deferred"},
+    {"id": "FINDING-007", "title": "No focus-visible ring on custom controls", "impact": "medium", "category": "interaction", "status": "deferred"},
+    {"id": "FINDING-008", "title": "Footer info text too small", "impact": "medium", "category": "typography", "status": "fixed"},
+    {"id": "FINDING-009", "title": "No page navigation", "impact": "polish", "category": "content", "status": "deferred"},
+    {"id": "FINDING-010", "title": "Admin back link hard to find on mobile", "impact": "polish", "category": "responsive", "status": "deferred"}
+  ]
+}
