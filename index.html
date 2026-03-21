@@ -236,7 +236,7 @@
     </div>
 
     <div class="card">
-      <div class="card-header">Flight Details</div>
+
       <div class="form-group" style="margin-bottom:12px">
         <label>Elite Status</label>
         <div class="segmented-control" id="eliteControl">
@@ -299,7 +299,8 @@
   </div>
 
   <script type="module">
-import { earningPrograms, airports } from './data/earning-rules.js';
+import { earningPrograms } from './data/earning-rules.js';
+import { airports } from './data/airports.js';
 
 /**
  * ATMOS REWARDS EARNING MODEL - Based on official Alaska Airlines documentation
@@ -527,6 +528,9 @@ function populateFareClasses() {
     o.textContent = f.name;
     fareClassSelect.appendChild(o);
   });
+  // Default to first Economy (100%) fare class
+  const econOption = [...fareClassSelect.options].find(o => o.textContent.includes('Economy (100%)'));
+  if (econOption) fareClassSelect.value = econOption.value;
   calculate();
 }
 
