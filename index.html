@@ -69,7 +69,7 @@
     .results-table .city-code:hover::after,.results-table .city-code:hover::before{opacity:1;visibility:visible}
 
     /* Toggle button */
-    .expand-toggle{position:absolute;bottom:0;left:50%;transform:translate(-50%,50%);background:linear-gradient(180deg,#1e1e2a 0%,#16161f 100%);border:1px solid var(--border);border-radius:50%;width:28px;height:28px;padding:0;cursor:pointer;color:var(--text-muted);display:none;align-items:center;justify-content:center;transition:all 0.2s ease;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:10}
+    .expand-toggle{position:absolute;bottom:0;left:50%;transform:translate(-50%,50%);background:linear-gradient(180deg,#1e1e2a 0%,#16161f 100%);border:1px solid var(--border);border-radius:50%;width:44px;height:44px;padding:0;cursor:pointer;color:var(--text-muted);display:none;align-items:center;justify-content:center;transition:all 0.2s ease;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:10}
     .expand-toggle:hover{color:var(--text);background:linear-gradient(180deg,#252532 0%,#1a1a24 100%);border-color:rgba(255,255,255,0.1);transform:translate(-50%,50%) scale(1.05)}
     .expand-toggle:active{transform:translate(-50%,50%) scale(0.95)}
     .results-bar.has-results .expand-toggle{display:flex}
@@ -130,7 +130,7 @@
     select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
     select option{background:var(--surface);color:var(--text)}
     .pricing-toggle{display:flex;gap:4px;background:var(--bg);border-radius:8px;padding:4px;margin-bottom:12px}
-    .pricing-toggle button{flex:1;background:transparent;border:none;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:0.8rem;color:var(--text-muted);cursor:pointer;border-radius:6px;transition:all 0.15s}
+    .pricing-toggle button{flex:1;background:transparent;border:none;padding:12px 12px;min-height:44px;font-family:'DM Sans',sans-serif;font-size:0.8rem;color:var(--text-muted);cursor:pointer;border-radius:6px;transition:all 0.15s}
     .pricing-toggle button.active{background:var(--surface-elevated);color:var(--text)}
     .pricing-toggle button:hover:not(.active){color:var(--text)}
     .pricing-inputs{display:none}
@@ -151,7 +151,7 @@
     .cpm-label{font-size:0.7rem;color:var(--text-muted)}
     .cpm-breakdown{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:0.7rem;color:var(--text-muted)}
     .info-note{margin-top:16px;padding:12px;background:var(--bg);border-radius:8px;font-size:0.65rem;color:var(--text-muted);line-height:1.5;text-align:center}
-    .info-note a{color:var(--accent);text-decoration:none}
+    .info-note a{color:var(--accent);text-decoration:none;display:inline-block;padding:8px 0;min-height:44px;line-height:28px}
     .info-note a:hover{text-decoration:underline}
 
     @media(max-width:600px){
