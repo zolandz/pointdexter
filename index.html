@@ -15,7 +15,7 @@
     body{font-family:'praxis-next',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100%;line-height:1.5;overflow-x:hidden;overflow-y:auto;width:100%;position:fixed;left:0;right:0;top:0;bottom:0;-webkit-overflow-scrolling:touch}
 
     /* Results bar */
-    .results-bar{position:sticky;top:0;left:0;right:0;z-index:100;background:linear-gradient(180deg,#1a1a2e 0%,#12121a 100%);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);transition:all 0.3s ease;margin-bottom:14px}
+    .results-bar{position:sticky;top:0;left:0;right:0;z-index:100;background:linear-gradient(180deg,#1e1e3a 0%,#141428 100%);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);transition:all 0.3s ease;margin-bottom:14px}
     .results-bar::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--success),var(--accent));background-size:200% 100%;opacity:0;transition:opacity 0.3s}
     .results-bar.has-results::before{opacity:1;animation:gradient-shift 3s ease-in-out infinite}
     @keyframes gradient-shift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
@@ -26,11 +26,11 @@
     .results-empty-state{color:var(--text);font-size:1.5rem;display:flex;align-items:center;justify-content:center;gap:12px;transition:opacity 0.3s ease,transform 0.3s ease}
     .results-empty-state .plane-icon{opacity:0.85;animation:gentle-float 4s ease-in-out infinite;display:flex;align-items:center}
     .results-empty-state .plane-icon svg{width:28px;height:28px;fill:url(#plane-gradient)}
-    .results-empty-state .site-name{font-weight:700;letter-spacing:-0.03em;background:linear-gradient(135deg,#fff 0%,#a5b4fc 50%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .results-empty-state .site-name{font-family:'praxis-next',sans-serif;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;font-size:1.2rem;background:linear-gradient(135deg,#fff 0%,#6ee7b7 35%,#a5b4fc 65%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
     @keyframes gentle-float{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-2px) rotate(2deg)}}
 
-    .reset-btn{position:absolute;left:calc(100% + 12px);top:50%;transform:translateY(-50%);background:transparent;border:1px solid var(--border);border-radius:6px;padding:6px;font-size:0;line-height:1;color:var(--text-muted);cursor:pointer;transition:all 0.15s;opacity:0;pointer-events:none;display:flex;align-items:center;justify-content:center}
-    .reset-btn:hover{color:var(--text);border-color:var(--text-muted);background:rgba(255,255,255,0.03)}
+    .reset-btn{position:absolute;left:calc(100% + 12px);top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.08);border:none;border-radius:50%;padding:6px;font-size:0;line-height:1;color:var(--text-muted);cursor:pointer;transition:all 0.15s;opacity:0;pointer-events:none;display:flex;align-items:center;justify-content:center}
+    .reset-btn:hover{color:var(--text);background:rgba(255,255,255,0.14)}
     .reset-btn:active{transform:translateY(-50%) scale(0.95)}
     .reset-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2}
     .results-bar.has-results .reset-btn{opacity:1;pointer-events:auto}
@@ -45,7 +45,10 @@
     .results-hero{position:relative}
     .results-hero-text{text-align:center}
     .results-miles-row{position:relative;display:inline-block}
-    .results-miles{font-family:'JetBrains Mono',monospace;font-size:2.75rem;font-weight:500;letter-spacing:-0.03em;background:linear-gradient(135deg,#fff 0%,#a5b4fc 40%,var(--accent) 70%,var(--success) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;text-shadow:0 0 60px rgba(59,130,246,0.3)}
+    .results-miles{font-family:'JetBrains Mono',monospace;font-size:2.75rem;font-weight:500;letter-spacing:-0.03em;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;cursor:pointer;user-select:none;transition:text-shadow 0.3s ease}
+    .results-miles.hero-rdm{background-image:linear-gradient(135deg,#fff 0%,#6ee7b7 40%,var(--success) 100%);text-shadow:0 0 60px rgba(52,211,153,0.3)}
+    .results-miles.hero-eqm{background-image:linear-gradient(135deg,#fff 0%,#a5b4fc 40%,var(--accent) 100%);text-shadow:0 0 60px rgba(59,130,246,0.3)}
+    .results-miles.hero-dist{background-image:linear-gradient(135deg,#e0e0e0 0%,#fff 50%,#e0e0e0 100%);text-shadow:0 0 60px rgba(255,255,255,0.15)}
     .results-label{font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:500;margin-top:4px}
 
     /* Expanded view - table */
@@ -58,7 +61,7 @@
     .results-table th:first-child{text-align:left}
     .results-table th[title]{border-bottom:1px dotted var(--text-muted)}
     .results-table td{padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;text-align:right;border-top:1px solid rgba(255,255,255,0.04)}
-    .results-table td:first-child{text-align:left;font-weight:500}
+    .results-table td:first-child{text-align:left;font-weight:400}
     .results-table tr:hover td{background:rgba(255,255,255,0.02)}
     .results-table .segment-route{display:inline-flex;align-items:center;gap:6px}
     .results-table .plane-icon{font-size:9px;opacity:0.4}
@@ -71,14 +74,13 @@
     .results-table .city-code:hover::after,.results-table .city-code:hover::before{opacity:1;visibility:visible}
 
     /* Toggle button */
-    .expand-toggle{position:absolute;bottom:0;left:50%;transform:translate(-50%,50%);background:linear-gradient(180deg,#1e1e2a 0%,#16161f 100%);border:1px solid var(--border);border-radius:50%;width:44px;height:44px;padding:0;cursor:pointer;color:var(--text-muted);display:none;align-items:center;justify-content:center;transition:all 0.2s ease;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:10}
-    .expand-toggle:hover{color:var(--text);background:linear-gradient(180deg,#252532 0%,#1a1a24 100%);border-color:rgba(255,255,255,0.1);transform:translate(-50%,50%) scale(1.05)}
+    .expand-toggle{position:absolute;bottom:0;left:50%;transform:translate(-50%,50%);background:var(--accent);border:none;border-radius:50%;width:28px;height:28px;padding:0;cursor:pointer;color:rgba(255,255,255,0.9);display:none;align-items:center;justify-content:center;transition:all 0.2s ease;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:10}
+    .expand-toggle:hover{color:#fff;filter:brightness(1.2);transform:translate(-50%,50%) scale(1.08)}
     .expand-toggle:active{transform:translate(-50%,50%) scale(0.95)}
     .results-bar.has-results .expand-toggle{display:flex}
-    .expand-toggle .icon-plus,.expand-toggle .icon-minus{font-size:18px;font-weight:300;line-height:1;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
-    .expand-toggle .icon-minus{display:none}
-    .results-bar.expanded .expand-toggle .icon-plus{display:none}
-    .results-bar.expanded .expand-toggle .icon-minus{display:flex}
+    .expand-toggle .chevron{display:flex;align-items:center;justify-content:center;transition:transform 0.25s ease}
+    .expand-toggle .chevron svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.5;fill:none}
+    .results-bar.expanded .expand-toggle .chevron{transform:rotate(180deg)}
 
     /* Main content */
     .main-content{max-width:600px;margin:0 auto;padding:24px 24px 48px;position:relative;z-index:1}
@@ -101,7 +103,7 @@
     .route-input.new-field,.route-arrow.new-field{animation:field-appear 0.3s ease-out}
     @keyframes field-appear{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
     /* Route reset button */
-    .route-reset-btn{background:transparent;border:none;padding:4px;color:var(--text-muted);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;border-radius:4px;opacity:0.3;order:2}
+    .route-reset-btn{background:transparent;border:none;padding:4px;color:var(--text-muted);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;border-radius:4px;opacity:0.6;order:2}
     .route-reset-btn:disabled{cursor:default;opacity:0.15}
     .route-reset-btn:not(:disabled):hover{color:var(--text);background:rgba(255,255,255,0.05);opacity:1}
     .route-reset-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2}
@@ -152,8 +154,8 @@
     .cpm-value.poor{color:#ef4444}
     .cpm-label{font-size:0.7rem;color:var(--text-muted)}
     .cpm-breakdown{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:0.7rem;color:var(--text-muted)}
-    .info-note{margin-top:16px;padding:12px;background:var(--bg);border-radius:8px;font-size:0.75rem;color:var(--text-muted);line-height:1.5;text-align:center}
-    .info-note a{color:var(--accent);text-decoration:none;display:inline-block;padding:8px 0;min-height:44px;line-height:28px}
+    .info-note{margin-top:16px;padding:12px;background:var(--bg);border-radius:8px;font-size:0.65rem;color:var(--text-muted);line-height:1.5;text-align:center;font-family:'praxis-next-condensed','praxis-next',system-ui,sans-serif}
+    .info-note a{color:var(--accent);text-decoration:none}
     .info-note a:hover{text-decoration:underline}
 
     @media(max-width:600px){
@@ -174,13 +176,13 @@
 <body>
   <div class="results-bar" id="resultsBar">
     <div class="results-bar-inner">
-      <div class="results-empty-state"><span class="plane-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="plane-gradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fff"/><stop offset="50%" stop-color="#a5b4fc"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient></defs><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></span> <span class="site-name">Pointdexter</span></div>
+      <div class="results-empty-state"><span class="plane-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="plane-gradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fff"/><stop offset="35%" stop-color="#6ee7b7"/><stop offset="65%" stop-color="#a5b4fc"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient></defs><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></span> <span class="site-name">Pointdexter</span></div>
       <div class="results-content">
         <div class="results-collapsed">
           <div class="results-hero">
             <div class="results-hero-text">
               <div class="results-miles-row">
-                <div class="results-miles" id="totalMiles">0</div>
+                <div class="results-miles hero-rdm" id="totalMiles">0</div>
                 <button class="reset-btn" id="resetBtn" title="Reset">
                   <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
@@ -210,8 +212,7 @@
       </div>
     </div>
     <button class="expand-toggle" id="expandToggle" title="Toggle details">
-      <span class="icon-plus">+</span>
-      <span class="icon-minus">−</span>
+      <span class="chevron"><svg viewBox="0 0 16 16"><polyline points="4 6 8 10 12 6"/></svg></span>
     </button>
   </div>
 
@@ -279,24 +280,22 @@
       <div id="pointsInputs" class="pricing-inputs">
         <div class="price-input-row">
           <div class="price-input-group"><label>Points Required</label><input type="text" id="pointsRequired" placeholder="25,000" inputmode="numeric" autocomplete="off"></div>
-          <div class="price-input-group"><label>Taxes & Fees (USD)</label><input type="text" id="pointsTaxes" placeholder="50.00" inputmode="decimal" autocomplete="off"></div>
-        </div>
-        <div class="price-input-row" style="margin-top:12px">
-          <div class="price-input-group"><label>Compare to Cash Price (USD)</label><input type="text" id="pointsCashCompare" placeholder="850.00" inputmode="decimal" autocomplete="off"></div>
         </div>
         <div id="pointsResult" class="cpm-result">
-          <div class="cpm-value" id="pointsValue">0¢</div>
-          <div class="cpm-label">value per point redeemed</div>
+          <div class="cpm-value" id="pointsValue">--</div>
+          <div class="cpm-label">points per mile</div>
           <div class="cpm-breakdown" id="pointsBreakdown"></div>
+        </div>
+        <div id="pointsNoRoute" class="cpm-result" style="display:none">
+          <div style="font-size:0.8rem;color:var(--text-muted);text-align:center">Enter a route above to calculate points per mile</div>
         </div>
       </div>
     </div>
 
     <div class="info-note">
-      Based on official Atmos Rewards 2025 earning rates.<br>
       <strong>EQM (Status Points)</strong> = Distance × Fare Class Rate (no elite bonus)<br>
       <strong>RDM (Redeemable)</strong> = Distance × Fare Class Rate + Elite Bonus<br>
-      <a href="admin.html">View earning rules</a>
+      Based on official Atmos Rewards 2025 earning rates. <a href="admin.html">View earning rules</a>
     </div>
   </div>
 
@@ -335,6 +334,15 @@ const routeInputRow = document.getElementById('routeInputRow');
 const routeResetBtn = document.getElementById('routeResetBtn');
 
 let pendingAddField = null; // Track pending field addition
+let currentTotalDist = 0; // Exposed for points-per-mile calculation
+let currentTotalEQM = 0;
+let currentTotalRDM = 0;
+const heroModes = [
+  { key: 'rdm', label: 'redeemable miles' },
+  { key: 'eqm', label: 'status points (eqm)' },
+  { key: 'dist', label: 'distance (miles)' }
+];
+let heroModeIndex = 0;
 
 function getLegInputs() {
   return Array.from(routeInputRow.querySelectorAll('.route-input input'));
@@ -488,8 +496,6 @@ window.addEventListener('resize', () => { if (window.innerWidth > 600 && !isExpa
 
 const cashPriceInput = document.getElementById('cashPrice');
 const pointsRequiredInput = document.getElementById('pointsRequired');
-const pointsTaxesInput = document.getElementById('pointsTaxes');
-const pointsCashCompareInput = document.getElementById('pointsCashCompare');
 const cpmResult = document.getElementById('cpmResult');
 const pointsResult = document.getElementById('pointsResult');
 
@@ -500,10 +506,17 @@ document.getElementById('resetBtn').addEventListener('click', () => {
   populateFareClasses();
   cashPriceInput.value = '';
   pointsRequiredInput.value = '';
-  pointsTaxesInput.value = '';
-  pointsCashCompareInput.value = '';
+  currentTotalDist = 0;
+  currentTotalEQM = 0;
+  currentTotalRDM = 0;
+  heroModeIndex = 0;
+  document.querySelector('.results-label').textContent = 'redeemable miles';
+  const heroEl = document.getElementById('totalMiles');
+  heroEl.classList.remove('hero-eqm', 'hero-dist');
+  heroEl.classList.add('hero-rdm');
   cpmResult.classList.remove('visible');
   pointsResult.classList.remove('visible');
+  document.getElementById('pointsNoRoute').style.display = 'none';
   resultsBar.classList.remove('has-results');
   hideError();
   getLegInputs()[0].focus();
@@ -608,7 +621,7 @@ function getAirports() {
 function calculate() {
   updateArrows();
   const codes = getAirports();
-  if (codes.length < 2) { hideError(); resultsBar.classList.remove('has-results'); return; }
+  if (codes.length < 2) { hideError(); resultsBar.classList.remove('has-results'); currentTotalDist = 0; calculatePointsValue(); return; }
   for (const c of codes) { if (!airports[c]) { showError('Unknown airport code: ' + c); return; } }
   hideError();
 
@@ -656,7 +669,10 @@ function calculate() {
     });
   }
 
-  document.getElementById('totalMiles').textContent = totalRDM.toLocaleString();
+  currentTotalDist = totalDist;
+  currentTotalEQM = totalEQM;
+  currentTotalRDM = totalRDM;
+  updateHeroDisplay();
 
   let tableHtml = segs.map(s => `<tr>
     <td><span class="segment-route"><span class="city-code" data-tooltip="${s.originName}">${s.origin}</span><span class="plane-icon">✈</span><span class="city-code" data-tooltip="${s.destName}">${s.destination}</span></span></td>
@@ -702,6 +718,57 @@ function parseCurrency(v) { return v ? parseFloat(v.replace(/[$,]/g, '')) || 0 :
 function parsePoints(v) { return v ? parseInt(v.replace(/,/g, '')) || 0 : 0; }
 function getCurrentTotalMiles() { const el = document.getElementById('totalMiles'); return el ? parseInt(el.textContent.replace(/,/g, '')) || 0 : 0; }
 
+function getHeroValue() {
+  const mode = heroModes[heroModeIndex];
+  if (mode.key === 'rdm') return currentTotalRDM;
+  if (mode.key === 'eqm') return currentTotalEQM;
+  return currentTotalDist;
+}
+
+function applyHeroClass(el, mode) {
+  el.classList.remove('hero-rdm', 'hero-eqm', 'hero-dist');
+  el.classList.add('hero-' + mode.key);
+}
+
+function updateHeroDisplay(animate) {
+  const el = document.getElementById('totalMiles');
+  const label = document.querySelector('.results-label');
+  const mode = heroModes[heroModeIndex];
+  const value = getHeroValue();
+  if (animate) {
+    el.style.transition = 'transform 0.15s ease-in, opacity 0.15s ease-in';
+    el.style.transform = 'translateY(-8px)';
+    el.style.opacity = '0';
+    label.style.transition = 'opacity 0.15s ease-in';
+    label.style.opacity = '0';
+    setTimeout(() => {
+      el.textContent = value.toLocaleString();
+      label.textContent = mode.label;
+      applyHeroClass(el, mode);
+      el.style.transition = 'transform 0.2s ease-out, opacity 0.2s ease-out';
+      el.style.transform = 'translateY(8px)';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          el.style.transform = 'translateY(0)';
+          el.style.opacity = '1';
+          label.style.transition = 'opacity 0.2s ease-out';
+          label.style.opacity = '1';
+        });
+      });
+    }, 150);
+  } else {
+    el.textContent = value.toLocaleString();
+    label.textContent = mode.label;
+    applyHeroClass(el, mode);
+  }
+}
+
+document.getElementById('totalMiles').addEventListener('click', () => {
+  if (!currentTotalRDM) return;
+  heroModeIndex = (heroModeIndex + 1) % heroModes.length;
+  updateHeroDisplay(true);
+});
+
 function calculateCPM() {
   const m = getCurrentTotalMiles(), p = parseCurrency(cashPriceInput.value);
   if (!m || !p) { cpmResult.classList.remove('visible'); return; }
@@ -718,24 +785,25 @@ function calculateCPM() {
 }
 
 function calculatePointsValue() {
-  const pts = parsePoints(pointsRequiredInput.value), tax = parseCurrency(pointsTaxesInput.value), cash = parseCurrency(pointsCashCompareInput.value);
-  if (!pts || !cash) { pointsResult.classList.remove('visible'); return; }
-  const cpp = ((cash - tax) / pts) * 100;
+  const pts = parsePoints(pointsRequiredInput.value);
+  const noRouteEl = document.getElementById('pointsNoRoute');
+  if (!pts) { pointsResult.classList.remove('visible'); noRouteEl.style.display = 'none'; return; }
+  if (!currentTotalDist) { pointsResult.classList.remove('visible'); noRouteEl.style.display = 'block'; return; }
+  noRouteEl.style.display = 'none';
+  const ppm = pts / currentTotalDist;
   const el = document.getElementById('pointsValue');
   const br = document.getElementById('pointsBreakdown');
-  el.textContent = Math.round(cpp) + '¢';
+  el.textContent = ppm.toFixed(1);
   el.classList.remove('good', 'okay', 'poor');
-  if (cpp >= 1.5) el.classList.add('good');
-  else if (cpp >= 1.0) el.classList.add('okay');
+  if (ppm < 10) el.classList.add('good');
+  else if (ppm <= 20) el.classList.add('okay');
   else el.classList.add('poor');
-  br.textContent = '($' + cash.toFixed(2) + ' − $' + tax.toFixed(2) + ' taxes) ÷ ' + pts.toLocaleString() + ' points = ' + Math.round(cpp) + '¢ per point';
+  br.textContent = pts.toLocaleString() + ' points ÷ ' + currentTotalDist.toLocaleString() + ' miles = ' + ppm.toFixed(1) + ' points per mile';
   pointsResult.classList.add('visible');
 }
 
 cashPriceInput.addEventListener('input', calculateCPM);
 pointsRequiredInput.addEventListener('input', calculatePointsValue);
-pointsTaxesInput.addEventListener('input', calculatePointsValue);
-pointsCashCompareInput.addEventListener('input', calculatePointsValue);
   </script>
 </body>
 </html>
